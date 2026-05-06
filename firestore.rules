@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isAdmin() { 
+      return isSignedIn() && (
+        request.auth.token.email in ['harleygirley97@gmail.com', 'tree@refurrm.org', 'admin@refurrm.org']
+      );
+    }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // --- Validation Assistants ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt', 'lastLogin'])
+        && data.uid is string && data.uid == request.auth.uid
+        && data.email is string && data.email.size() <= 256
+        && data.createdAt is timestamp
+        && data.lastLogin is timestamp;
+    }
+
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['userId', 'repoName', 'repoUrl', 'timestamp'])
+        && data.userId is string && data.userId == request.auth.uid
+        && data.repoName is string && data.repoName.size() <= 256
+        && data.repoUrl is string && data.repoUrl.size() <= 1024
+        && data.timestamp is timestamp;
+    }
+
+    function isValidArticleLog(data) {
+      return data.keys().hasAll(['userId', 'title', 'url', 'imageData', 'timestamp'])
+        && data.userId is string && data.userId == request.auth.uid
+        && data.title is string && data.title.size() <= 256
+        && data.url is string && data.url.size() <= 2048
+        && data.imageData is string && data.imageData.size() <= 2000000 // Roughly 2MB
+        && data.timestamp is timestamp;
+    }
+
+    // --- Collections ---
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['lastLogin', 'displayName', 'photoURL']);
+    }
+
+    // 2. Audit Logs Collection
+    match /auditLogs/{logId} {
+      // Secure list query compliance
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidAuditLog(incoming());
+      allow update, delete: if isAdmin(); // Users shouldn't edit their logs for integrity
+    }
+
+    // 3. Article Logs Collection
+    match /articleLogs/{logId} {
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidArticleLog(incoming());
+      allow update, delete: if isAdmin();
+    }
+  }
+}

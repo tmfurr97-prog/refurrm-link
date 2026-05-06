@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "isAdmin": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastLogin": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "AuditLog": {
+      "title": "Repo Audit Log",
+      "description": "History of repositories analyzed by a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "repoName": { "type": "string" },
+        "repoUrl": { "type": "string" },
+        "analysisResult": { "type": "string" },
+        "infographicUrl": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "repoName", "timestamp"]
+    },
+    "ArticleLog": {
+      "title": "Article Sketch Log",
+      "description": "History of articles turned into infographics",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "imageData": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "url", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Global audit history"
+    },
+    "/articleLogs/{logId}": {
+      "schema": "ArticleLog",
+      "description": "Global article sketch history"
+    }
+  }
+}
