@@ -25,7 +25,17 @@ const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.message || 'Authentication failed. Please try again.');
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Login cancelled. Please keep the popup window open to sign in.');
+      } else if (err.code === 'auth/cancelled-by-user') {
+        setError('Login process was cancelled.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Network error. Please check your internet connection.');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('This login method is not enabled. Please enable Google/GitHub in your Firebase Console (Authentication > Sign-in method).');
+      } else {
+        setError(err.message || 'Authentication failed. Please try again.');
+      }
     } finally {
       setIsAuthenticating(false);
     }
@@ -56,9 +66,9 @@ const LoginPage: React.FC = () => {
               <Sparkles className="w-8 h-8 text-violet-400" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-400 to-emerald-400 bg-clip-text text-transparent mb-2">
-              Link2Ink Studio
+              ReFURRM L'INK
             </h1>
-            <p className="text-slate-400 text-sm font-mono tracking-tight">Access your creative workspace</p>
+            <p className="text-slate-400 text-sm font-mono tracking-tight">Sign in to your account</p>
           </div>
 
           {error && (
@@ -135,7 +145,7 @@ const LoginPage: React.FC = () => {
               disabled={isAuthenticating}
               className="w-full bg-gradient-to-r from-violet-600 to-emerald-600 hover:from-violet-500 hover:to-emerald-500 text-white font-semibold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-violet-500/10 hover:shadow-violet-500/20 group mt-6 disabled:opacity-50"
             >
-              Sign In to Studio
+              Sign In
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
 
@@ -145,7 +155,7 @@ const LoginPage: React.FC = () => {
                 <div className="w-full border-t border-slate-700/50" />
               </div>
               <div className="relative flex justify-center text-[10px]">
-                <span className="bg-[#0f172a] px-3 text-slate-500 font-mono tracking-widest uppercase">Access Gateway</span>
+                <span className="bg-[#0f172a] px-3 text-slate-500 font-mono tracking-widest uppercase">Or sign in with</span>
               </div>
             </div>
 
@@ -174,7 +184,7 @@ const LoginPage: React.FC = () => {
 
           {/* Footer */}
           <p className="mt-8 text-center text-xs text-slate-500 font-mono">
-            New to Link2Ink?{' '}
+            New to ReFURRM L'INK?{' '}
             <button 
               onClick={() => setError("Registration is currently private. Use the Access Gateway to request trial access.")}
               className="text-violet-400 hover:text-violet-300 transition-colors font-medium"

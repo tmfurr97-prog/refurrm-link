@@ -372,6 +372,16 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownloadFile = (fileName: string, content: string) => {
+    const element = document.createElement("a");
+    const file = new Blob([content], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = fileName;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
   const generateHandoffPrompt = () => {
     if (!analysisResult) return "";
     
@@ -740,7 +750,16 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                         <div className="flex flex-col md:flex-row gap-6">
                              {/* File Selection Sidebar */}
                              <div className="md:w-64 space-y-2">
-                                <h4 className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3">REMASTERED_SOURCE_DECK</h4>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h4 className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">REMASTERED_SOURCE_DECK</h4>
+                                    <button 
+                                        onClick={() => remasteredFiles.forEach(f => handleDownloadFile(f.fileName, f.content))}
+                                        className="text-[10px] font-mono text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1"
+                                        title="Download All Files"
+                                    >
+                                        <Download className="w-3 h-3" /> ALL
+                                    </button>
+                                </div>
                                 {remasteredFiles.map((file, idx) => (
                                     <button
                                         key={idx}
@@ -772,13 +791,22 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                             {remasteredFiles[selectedRemasteredIdx].fileName}
                                         </span>
                                     </div>
-                                    <button 
-                                        onClick={() => handleCopy(remasteredFiles[selectedRemasteredIdx].content)}
-                                        className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-slate-400 hover:text-white"
-                                        title="Copy Code"
-                                    >
-                                        {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={() => handleDownloadFile(remasteredFiles[selectedRemasteredIdx].fileName, remasteredFiles[selectedRemasteredIdx].content)}
+                                            className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-slate-400 hover:text-white"
+                                            title="Download File"
+                                        >
+                                            <Download className="w-3 h-3" />
+                                        </button>
+                                        <button 
+                                            onClick={() => handleCopy(remasteredFiles[selectedRemasteredIdx].content)}
+                                            className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-slate-400 hover:text-white"
+                                            title="Copy Code"
+                                        >
+                                            {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="flex-1 p-4 overflow-auto font-mono text-[11px] leading-relaxed text-slate-300 selection:bg-violet-500/30 whitespace-pre scrollbar-hide">
                                     {remasteredFiles[selectedRemasteredIdx].content}
@@ -969,6 +997,12 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                 <Lightbulb className="w-3 h-3" /> Report generated via SiteSketch AI Engine - High Fidelity Mode
                             </div>
                             <div className="flex items-center gap-3">
+                                <button 
+                                    onClick={() => handleDownloadFile(`${currentRepoName}-intelligence-report.md`, analysisResult.report)}
+                                    className="text-[10px] font-mono text-slate-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                                >
+                                    <Download className="w-3 h-3" /> DOWNLOAD_REPORT
+                                </button>
                                 <button 
                                     onClick={() => handleCopy(analysisResult.report)}
                                     className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1.5"

@@ -1,6 +1,6 @@
 {
-  "name": "L'INK",
-  "description": "L'Ink functions as a dynamic visual intelligence platform, proficiently converting GitHub repositories into engaging, interactive architectural blueprints, providing a comprehensive and easily understandable overview of complex code structures. Additionally, it can transform extensive web articles into clean, professional, and easily digestible infographics, making complex information accessible and visually appealing to a broad audience.",
+  "name": "ReFURRM L'INK",
+  "description": "ReFURRM L'INK transforms complex GitHub repositories into interactive Logic Maps. Identify security vulnerabilities, performance bottlenecks, and architectural rot before they reach production.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

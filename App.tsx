@@ -7,10 +7,10 @@ import React, { useState, useEffect } from 'react';
 import RepoAnalyzer from './components/RepoAnalyzer';
 import ArticleToInfographic from './components/ArticleToInfographic';
 import Home from './components/Home';
-import ApiKeyModal from './components/ApiKeyModal';
 import LoginPage from './components/LoginPage';
+import ApiKeyModal from './components/ApiKeyModal';
 import { ViewMode, RepoHistoryItem, ArticleHistoryItem } from './types';
-import { Github, PenTool, GitBranch, FileText, Home as HomeIcon, CreditCard, ShieldAlert, Sparkles } from 'lucide-react';
+import { Github, PenTool, GitBranch, FileText, Home as HomeIcon, ShieldAlert, Sparkles, CreditCard } from 'lucide-react';
 import { UserMenu } from './components/UserMenu';
 import { useAuth } from './components/AuthProvider';
 
@@ -30,10 +30,8 @@ const App: React.FC = () => {
         const has = await window.aistudio.hasSelectedApiKey();
         setHasApiKey(has);
       } else {
-        // In environments without the AI Studio bridge, strictly checking might block dev.
-        // However, per instructions to "Require a paid key", we default false if we can't verify.
-        // In a real deploy, window.aistudio is guaranteed.
-        setHasApiKey(false);
+        const local = localStorage.getItem('REFURRM_API_KEY');
+        setHasApiKey(!!local);
       }
       setCheckingKey(false);
     };
@@ -52,18 +50,14 @@ const App: React.FC = () => {
     setArticleHistory(prev => [item, ...prev]);
   };
 
-  const onReauthRequested = () => {
-    setHasApiKey(false); // This will trigger the modal to reappear
-  };
-
   if (checkingKey || loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center animate-pulse">
-            <PenTool className="w-6 h-6 text-violet-400" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center animate-pulse">
+            <GitBranch className="w-6 h-6 text-indigo-400" />
           </div>
-          <div className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em] animate-pulse">Initializing_Workspace...</div>
+          <div className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em] animate-pulse">Setting things up...</div>
         </div>
       </div>
     );
@@ -84,14 +78,14 @@ const App: React.FC = () => {
             onClick={() => setCurrentView(ViewMode.HOME)}
             className="flex items-center gap-3 md:gap-4 group transition-opacity hover:opacity-80"
           >
-            <div className="relative flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-xl bg-slate-900/50 border border-white/10 shadow-inner group-hover:border-violet-500/50 transition-colors">
-               <PenTool className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            <div className="relative flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-xl bg-slate-900/50 border border-white/10 shadow-inner group-hover:border-emerald-500/50 transition-colors">
+               <GitBranch className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <div className="text-left">
               <h1 className="text-lg md:text-xl font-extrabold text-white tracking-tight font-sans flex items-center gap-2">
-                Link2Ink <span className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-mono text-slate-400 border border-white/5 hidden sm:inline-block">Studio</span>
+                ReFURRM <span className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-mono text-emerald-400 border border-white/5 hidden sm:inline-block">L'INK</span>
               </h1>
-              <p className="text-xs font-mono text-slate-400 tracking-wider uppercase hidden sm:block">Visual Intelligence Platform</p>
+              <p className="text-xs font-mono text-slate-400 tracking-wider uppercase hidden sm:block">Repository Analysis Platform</p>
             </div>
           </button>
             <div className="flex items-center gap-4">
@@ -172,11 +166,11 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 order-2 md:order-1">
             <p className="text-xs font-mono text-slate-600">
-              <span className="text-violet-500/70">link</span>:<span className="text-emerald-500/70">ink</span>$
+              <span className="text-emerald-500/70">refurrm</span>:<span className="text-violet-500/70">link</span>$
             </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-mono text-slate-500 group hover:border-fuchsia-500/30 transition-colors">
-              <Sparkles className="w-3 h-3 text-fuchsia-400/50 group-hover:text-fuchsia-400 transition-colors" />
-              <span>Powered by Nano Banana Pro</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-mono text-slate-500 group hover:border-emerald-500/30 transition-colors">
+              <Sparkles className="w-3 h-3 text-emerald-400/50 group-hover:text-emerald-400 transition-colors" />
+              <span>Intelligent Code Maps</span>
             </div>
           </div>
           <div className="flex items-center gap-6 text-[10px] font-mono text-slate-500 order-1 md:order-2">

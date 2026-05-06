@@ -17,11 +17,11 @@ const Home: React.FC<HomeProps> = ({ onNavigate }) => {
       {/* Hero Section */}
       <div className="text-center space-y-4 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-200 to-slate-500 font-sans leading-tight">
-          Link 2 Ink
+          ReFURRM L'INK
         </h1>
         
         <p className="text-slate-400 text-xl font-light max-w-2xl mx-auto leading-relaxed">
-          Turn links into clear, professional infographics instantly.
+          Transform complex repositories into interactive Logic Maps.
         </p>
 
         {/* Vertical Action Stack */}
@@ -138,8 +138,8 @@ const Home: React.FC<HomeProps> = ({ onNavigate }) => {
         </p>
         
         <p className="text-white/70 leading-relaxed mb-6">
-          L'INK transforms complex GitHub repositories into interactive <strong>Logic Maps</strong>. 
-          Identify security vulnerabilities, performance bottlenecks, and architectural rot before they reach production.
+          ReFURRM L'INK transforms complex GitHub repositories into interactive <strong>Logic Maps</strong>. 
+          Identify security vulnerabilities, design patterns, and potential code improvements before they reach production.
         </p>
 
         <div className="grid grid-cols-3 gap-4 text-left border-t border-white/10 pt-6">
@@ -152,8 +152,8 @@ const Home: React.FC<HomeProps> = ({ onNavigate }) => {
             <div className="text-[11px] text-white/50">Generate file-specific refactor prompts.</div>
           </div>
           <div>
-            <div className="text-amber-500 font-bold text-xs uppercase tracking-tighter">Remaster</div>
-            <div className="text-[11px] text-white/50">Execute full-stack transformations.</div>
+            <div className="text-amber-500 font-bold text-xs uppercase tracking-tighter">Improve</div>
+            <div className="text-[11px] text-white/50">Generate refactor suggestions automatically.</div>
           </div>
         </div>
       </div>

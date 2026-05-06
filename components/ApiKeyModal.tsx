@@ -3,90 +3,122 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState } from 'react';
-import { Shield, ExternalLink, CreditCard, Loader2, KeyRound, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Key, ShieldCheck, Zap, AlertCircle, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 
 interface ApiKeyModalProps {
   onKeySelected: () => void;
 }
 
 const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onKeySelected }) => {
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [key, setKey] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleConnect = async () => {
-    setIsConnecting(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!key.trim()) return;
+
+    setIsVerifying(true);
+    setError(null);
+
     try {
-      if (window.aistudio && window.aistudio.openSelectKey) {
-        await window.aistudio.openSelectKey();
-        // Assume success as per instructions, wait a tick for env to propagate
-        setTimeout(() => {
-            onKeySelected();
-        }, 500);
-      }
-    } catch (e) {
-      console.error("Failed to open key selector", e);
-      setIsConnecting(false);
+      // Store the key locally to persist across sessions in this environment
+      localStorage.setItem('REFURRM_API_KEY', key);
+      
+      // Artificial delay for feel
+      await new Promise(resolve => setTimeout(resolve, 800));
+      onKeySelected();
+    } catch (err: any) {
+      setError(err.message || "Failed to validate API Key. Please ensure it's a valid Gemini API Key.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4">
-      <div className="w-full max-w-md relative overflow-hidden glass-panel rounded-3xl border border-red-500/30 shadow-[0_0_50px_rgba(220,38,38,0.2)] animate-in fade-in zoom-in-95 duration-300">
-        
-        {/* Decorative Background */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+      <div className="w-full max-w-lg relative">
+        <div className="glass-panel rounded-3xl p-8 relative overflow-hidden border border-white/10 shadow-2xl">
+          {/* Animated background element */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-[80px]" />
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-[80px]" />
 
-        <div className="p-8 relative z-10 flex flex-col items-center text-center space-y-6">
-          
-          <div className="w-16 h-16 bg-slate-900/50 rounded-2xl flex items-center justify-center border border-red-500/30 shadow-xl">
-             <KeyRound className="w-8 h-8 text-red-400" />
-          </div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center border border-emerald-500/20">
+                <Key className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Enter your Gemini API Key</h2>
+                <p className="text-[10px] font-mono text-emerald-400/70 uppercase tracking-widest">To unlock AI-powered features</p>
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white font-sans">Paid Access Required</h2>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Link2Ink requires advanced Gemini models capable of <span className="text-slate-200 font-semibold">Image Generation</span>. These models are not available on the free tier.
-            </p>
-          </div>
+            <div className="space-y-4 mb-8">
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 group">
+                <Zap className="w-5 h-5 text-amber-400 mt-1" />
+                <div>
+                  <p className="text-sm font-medium text-slate-200">Why is this needed?</p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">Analyzing repositories and generating fixes requires a Gemini API key to access Google's advanced AI models.</p>
+                </div>
+              </div>
 
-          <div className="w-full p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-left">
-             <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-             <div className="space-y-1">
-                 <p className="text-xs font-bold text-red-200 uppercase tracking-wider">No Free Tier Access</p>
-                 <p className="text-xs text-red-200/70 leading-relaxed">
-                    You must select an API key associated with a <strong>Google Cloud Billing Project</strong>. Standard keys will result in errors.
-                 </p>
-             </div>
-          </div>
+              {error && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  {error}
+                </div>
+              )}
+            </div>
 
-          <button 
-            onClick={handleConnect}
-            disabled={isConnecting}
-            className="w-full py-4 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-red-900/80 hover:to-red-800/80 border border-white/10 hover:border-red-500/50 text-white rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-70"
-          >
-            {isConnecting ? (
-                <>
-                    <Loader2 className="w-5 h-5 animate-spin" /> Connecting...
-                </>
-            ) : (
-                <>
-                    <CreditCard className="w-5 h-5 group-hover:text-red-200" /> Select Paid API Key
-                </>
-            )}
-          </button>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative group">
+                <Key className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${key ? 'text-emerald-400' : 'text-slate-500'}`} size={18} />
+                <input
+                  type="password"
+                  value={key}
+                  onChange={(e) => setKey(e.target.value)}
+                  placeholder="Enter Gemini API Key..."
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10 transition-all font-mono text-sm"
+                  required
+                />
+              </div>
 
-          <div className="pt-4 border-t border-white/5 w-full">
-             <a 
-                href="https://ai.google.dev/gemini-api/docs/billing" 
+              <button
+                type="submit"
+                disabled={isVerifying || !key.trim()}
+                className="w-full group bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 py-4 rounded-2xl text-white font-bold text-sm tracking-widest uppercase transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {isVerifying ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Save and Get Started</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Built with Gemini AI</span>
+              </div>
+              <a 
+                href="https://aistudio.google.com/app/apikey" 
                 target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors font-mono"
-             >
-                View Billing Documentation <ExternalLink className="w-3 h-3" />
-             </a>
+                rel="noreferrer"
+                className="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 transition-colors uppercase tracking-widest underline decoration-emerald-500/30"
+              >
+                Get API Key
+              </a>
+            </div>
           </div>
-
         </div>
       </div>
     </div>

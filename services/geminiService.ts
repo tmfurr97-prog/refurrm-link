@@ -8,7 +8,7 @@ import { RepoFileTree, Citation } from '../types';
 
 // Helper to ensure we always get the freshest key from the environment
 // immediately before a call.
-const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAiClient = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export interface InfographicResult {
     imageData: string | null;
