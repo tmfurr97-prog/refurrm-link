@@ -75,6 +75,9 @@ export async function scanRepositoryForContext(
       // Must be a blob (file) not a tree (directory)
       if (fileNode.type !== 'blob') return false;
       
+      // Security/Performance: Reject any files over 50KB to protect the AI context limit
+      if (fileNode.size && fileNode.size > 50000) return false;
+      
       // Also grab anything explicitly named in the prompt without a regex
       // e.g. "Why is DevStudio.tsx breaking?"
       const fileNameMatch = prompt.includes(fileNode.path.split('/').pop() || '');
@@ -87,14 +90,13 @@ export async function scanRepositoryForContext(
     // Fetch the raw text contents of all identified files in parallel
     const scannedFiles: ScannedFile[] = await Promise.all(
       filesToFetch.map(async (fileNode) => {
-        // githubService uses blobUrls (or constructs raw URLs depending on tree fetch depth)
-        // Adjust for standard GitHub API tree response pattern usually requiring fetching by sha
-        // Since githubService doesn't export base raw formatting explicitly, we'll assume fetchFileContent 
-        // takes the raw GitHub user content URL or we construct it.
-        const rawContentUrl = `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/${fileNode.path}`;
+        // Fallback to fetchFileContent with proper auth handling. 
+        // For private repos, we should fetch via the GitHub API blob URL, which inherently uses the authenticated token 
+        // unlike raw.githubusercontent.com which 404s without params.
+        const blobApiUrl = `https://api.github.com/repos/${owner}/${repo}/git/blobs/${fileNode.sha}`;
         
         try {
-          const content = await fetchFileContent(rawContentUrl);
+          const content = await fetchFileContent(blobApiUrl);
           return { path: fileNode.path, content };
         } catch (err) {
           console.warn(`Failed to read file ${fileNode.path} for Master Read context`, err);

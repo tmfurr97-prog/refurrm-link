@@ -176,7 +176,7 @@ const DevStudio: React.FC<DevStudioProps> = ({ initialState, onNavigate }) => {
                 prompt,
                 tier: 'pro',
                 githubRepoMetadata: initialState?.repoName ? { owner: initialState.repoName.split('/')[0], repo: initialState.repoName.split('/')[1] } : undefined,
-                currentFileContext: files[0]
+                currentFileContext: files?.[0]
               });
               return result.response;
             }} 

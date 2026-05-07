@@ -23,10 +23,11 @@ export const analyzeContent = async (prompt: string, context: string): Promise<s
   );
 
   try {
-    // Context and prompt are sanitized before sending to avoid injection
+    // Prompt and context must NOT be HTML-sanitized here, as this breaks code syntax (e.g. <T>, <=).
+    // XSS protection should be handled on the UI render side instead.
     const result = await callGemini({
-      prompt: DOMPurify.sanitize(prompt),
-      context: DOMPurify.sanitize(context)
+      prompt: prompt,
+      context: context
     });
     
     return result.data.content;
