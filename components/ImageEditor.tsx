@@ -8,6 +8,13 @@ import { editImageWithGemini } from '../services/geminiService';
 import { ViewMode } from '../types';
 import { Upload, Wand2, Loader2, Download, ImageIcon, Palette, Terminal, ArrowLeft } from 'lucide-react';
 
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif'
+]);
+
 const STYLE_PRESETS = [
   "Neon Cyberpunk",
   "Minimalist Blueprint",
@@ -40,8 +47,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        alert('Please select a valid image file.');
+      if (!ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
+        alert('Please select a valid image file (PNG, JPEG, WEBP, or GIF).');
         return;
       }
       const reader = new FileReader();
