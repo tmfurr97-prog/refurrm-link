@@ -8,7 +8,10 @@ import { SimulationNodeDatum, SimulationLinkDatum } from 'd3';
 export enum ViewMode {
   HOME = 'HOME',
   REPO_ANALYZER = 'REPO_ANALYZER',
-  ARTICLE_INFOGRAPHIC = 'ARTICLE_INFOGRAPHIC'
+  ARTICLE_INFOGRAPHIC = 'ARTICLE_INFOGRAPHIC',
+  PRIVACY = 'PRIVACY',
+  TERMS = 'TERMS',
+  LOGIN = 'LOGIN'
 }
 
 export interface D3Node extends SimulationNodeDatum {

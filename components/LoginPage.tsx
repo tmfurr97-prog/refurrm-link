@@ -3,11 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState } from 'react';
-import { Mail, Lock, Sparkles, ArrowRight, Github, Loader2, AlertCircle } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Mail, Lock, Sparkles, ArrowRight, Github, Loader2, AlertCircle, Shield, Scale } from 'lucide-react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { loginWithGoogle, loginWithGithub } from '../services/firebase';
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  onTogglePrivacy?: () => void;
+  onToggleTerms?: () => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms }) => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [focused, setFocused] = useState<string | null>(null);
@@ -15,10 +22,21 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {
+    if (!executeRecaptcha) {
+      setError("Security verification failed to initialize.");
+      return;
+    }
+
     setIsAuthenticating(true);
     setError(null);
     setShowSetupGuide(false);
+    
     try {
+      const token = await executeRecaptcha('login');
+      if (!token) {
+        throw new Error("Failed to verify user authenticity.");
+      }
+
       if (provider === 'google') {
         await loginWithGoogle();
       } else {
@@ -312,6 +330,23 @@ const LoginPage: React.FC = () => {
                         </div>
                     </div>
                 )}
+            </div>
+
+            <div className="flex items-center justify-center gap-6 pt-4 text-[10px] text-slate-600 font-medium">
+                <button 
+                    onClick={onTogglePrivacy}
+                    className="hover:text-slate-400 transition-colors flex items-center gap-1.5"
+                >
+                    <Shield className="w-3 h-3" />
+                    Privacy Policy
+                </button>
+                <button 
+                    onClick={onToggleTerms}
+                    className="hover:text-slate-400 transition-colors flex items-center gap-1.5"
+                >
+                    <Scale className="w-3 h-3" />
+                    Terms of Service
+                </button>
             </div>
           </div>
         </div>
