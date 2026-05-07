@@ -15,6 +15,13 @@ const ALLOWED_IMAGE_MIME_TYPES = new Set([
   'image/gif'
 ]);
 
+const CANONICAL_IMAGE_MIME_TYPES: Record<string, string> = {
+  'image/png': 'image/png',
+  'image/jpeg': 'image/jpeg',
+  'image/webp': 'image/webp',
+  'image/gif': 'image/gif'
+};
+
 const STYLE_PRESETS = [
   "Neon Cyberpunk",
   "Minimalist Blueprint",
@@ -51,12 +58,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
         alert('Please select a valid image file (PNG, JPEG, WEBP, or GIF).');
         return;
       }
+      const safeMimeType = CANONICAL_IMAGE_MIME_TYPES[file.type];
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
         const base64Data = base64.split(',')[1];
         setImageData(base64Data);
-        setMimeType(file.type);
+        setMimeType(safeMimeType);
         setEditedImageData(null);
       };
       reader.readAsDataURL(file);
