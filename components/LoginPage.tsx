@@ -54,8 +54,11 @@ const LoginPage: React.FC = () => {
 
   const authorizedDomains = [
     'ais-dev-6bcfucldq7dzwx2qqxjwer-548351223917.us-east1.run.app',
-    'ais-pre-6bcfucldq7dzwx2qqxjwer-548351223917.us-east1.run.app'
+    'ais-pre-6bcfucldq7dzwx2qqxjwer-548351223917.us-east1.run.app',
+    window.location.hostname
   ];
+
+  const [diagnosticsVisible, setDiagnosticsVisible] = useState(false);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950 logic-map-bg">
@@ -119,15 +122,27 @@ const LoginPage: React.FC = () => {
                   <div>
                     <p className="text-slate-300 text-[10px] uppercase tracking-wider font-bold mb-2">Step 2: Authorized Domains</p>
                     <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
-                      Go to <strong>Authentication &gt; Settings &gt; Authorized domains</strong> and add these:
+                      Copy the domain marked <span className="text-emerald-400 font-bold underline">CURRENT</span> and add it to <strong>Settings &gt; Authorized domains</strong>.
                     </p>
                     <div className="space-y-1">
-                      {authorizedDomains.map(domain => (
-                        <code key={domain} className="block p-1.5 bg-black/50 rounded border border-white/10 text-[9px] text-emerald-400 select-all truncate">
-                          {domain}
-                        </code>
+                      {Array.from(new Set(authorizedDomains)).map(domain => (
+                        <div key={domain} className="flex items-center gap-1 group/item">
+                            <code className="flex-1 p-1.5 bg-black/50 rounded border border-white/10 text-[9px] text-emerald-400 select-all truncate">
+                            {domain}
+                            </code>
+                            {domain === window.location.hostname && (
+                                <span className="text-[8px] bg-emerald-500 font-bold text-slate-950 px-1.5 py-0.5 rounded animate-pulse">CURRENT</span>
+                            )}
+                        </div>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5">
+                    <p className="text-slate-300 text-[10px] uppercase tracking-wider font-bold mb-2">Why am I seeing this?</p>
+                    <p className="text-[10px] text-slate-500 italic leading-relaxed">
+                      Firebase limits authentication to specific domains to prevent "Domain Spoofing." This is the first line of defense for your user's identity.
+                    </p>
                   </div>
 
                   <div>
@@ -137,12 +152,20 @@ const LoginPage: React.FC = () => {
                     </code>
                   </div>
 
-                  <button 
-                    onClick={() => window.open('https://console.firebase.google.com/project/gen-lang-client-0231544530/authentication/providers', '_blank')}
-                    className="w-full py-2 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 rounded-md text-[10px] font-bold transition-colors border border-cyan-500/20"
-                  >
-                    OPEN FIREBASE CONSOLE
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button 
+                        onClick={() => window.open('https://console.firebase.google.com/project/gen-lang-client-0231544530/authentication/providers', '_blank')}
+                        className="w-full py-2 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 rounded-md text-[9px] font-bold transition-colors border border-cyan-500/20 uppercase"
+                    >
+                        Enable Providers
+                    </button>
+                    <button 
+                        onClick={() => window.open('https://console.firebase.google.com/project/gen-lang-client-0231544530/authentication/settings', '_blank')}
+                        className="w-full py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-md text-[9px] font-bold transition-colors border border-emerald-500/20 uppercase"
+                    >
+                        Add Domains
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -253,15 +276,44 @@ const LoginPage: React.FC = () => {
           </form>
 
           {/* Footer */}
-          <p className="mt-8 text-center text-xs text-slate-500 font-mono">
-            New to ReFURRM L'INK?{' '}
-            <button 
-              onClick={() => setError("Registration is currently private. Use the Access Gateway to request trial access.")}
-              className="text-violet-400 hover:text-violet-300 transition-colors font-medium"
-            >
-              Create an account
-            </button>
-          </p>
+          <div className="mt-8 space-y-4">
+            <p className="text-center text-xs text-slate-500 font-mono">
+                New to ReFURRM L'INK?{' '}
+                <button 
+                onClick={() => setError("Registration is currently private. Use the Access Gateway to request trial access.")}
+                className="text-violet-400 hover:text-violet-300 transition-colors font-medium underline underline-offset-4"
+                >
+                Create an account
+                </button>
+            </p>
+
+            <div className="pt-4 border-t border-white/5">
+                <button 
+                    onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
+                    className="w-full flex items-center justify-between text-[10px] text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-[0.2em] font-mono"
+                >
+                    System Architecture Info
+                    <Sparkles className={`w-3 h-3 transition-transform ${diagnosticsVisible ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {diagnosticsVisible && (
+                    <div className="mt-4 p-4 rounded-xl bg-slate-900/50 border border-white/5 space-y-3 animate-in fade-in slide-in-from-bottom-2">
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-pink-400 font-bold uppercase">Paid Tier & API Keys</p>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                                Paid users provide their own keys to ensure **Zero-Throttling** and **Direct Billing**. By using your own Gemini Key, you bypass shared limits and keep your data within your own cloud boundary.
+                            </p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-cyan-400 font-bold uppercase">Security Protocol</p>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                                ReFURRM utilizes AES-256 for key storage and ephemeral JWT tokens. Your repository metadata is analyzed in-memory and never persisted beyond your active session.
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
+          </div>
         </div>
 
         {/* Floating accent element */}

@@ -56,11 +56,18 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onKeySelected }) => {
             </div>
 
             <div className="space-y-4 mb-8">
-              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 group">
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 group hover:border-emerald-500/20 transition-colors">
                 <Zap className="w-5 h-5 text-amber-400 mt-1" />
                 <div>
-                  <p className="text-sm font-medium text-slate-200">Why is this needed?</p>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">Analyzing repositories and generating fixes requires a Gemini API key to access Google's advanced AI models.</p>
+                  <p className="text-sm font-medium text-slate-200">The Power of Your Own Key</p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+                    Analyzing repositories requires significant AI compute. Using your own key offers:
+                  </p>
+                  <ul className="space-y-2 text-[10px] text-slate-400 list-disc list-inside">
+                    <li><span className="text-slate-200">Zero Shared Throttling:</span> No queue times during peak usage.</li>
+                    <li><span className="text-slate-200">Unlimited Analysis:</span> Perform massive deep-dives without local caps.</li>
+                    <li><span className="text-slate-200">Enterprise Privacy:</span> Data routing stays within your cloud billing boundary.</li>
+                  </ul>
                 </div>
               </div>
 
@@ -103,6 +110,14 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onKeySelected }) => {
                 )}
               </button>
             </form>
+
+            <button
+                onClick={() => onKeySelected()}
+                className="w-full mt-4 text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-[0.2em] py-2"
+            >
+                Continue with Limited Trial 
+                <span className="block mt-0.5 opacity-50 capitalize font-sans tracking-normal">(Uses shared community quota)</span>
+            </button>
 
             <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
