@@ -78,14 +78,14 @@ const App: React.FC = () => {
             onClick={() => setCurrentView(ViewMode.HOME)}
             className="flex items-center gap-3 md:gap-4 group transition-opacity hover:opacity-80"
           >
-            <div className="relative flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-xl bg-slate-900/50 border border-white/10 shadow-inner group-hover:border-emerald-500/50 transition-colors">
-               <GitBranch className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            <div className="relative flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-xl bg-slate-900 border border-white/10 shadow-inner group-hover:border-pink-500/50 transition-colors overflow-hidden">
+               <img src="/logo-icon.svg" alt="RFL" className="w-6 h-6 md:w-8 md:h-8" />
             </div>
             <div className="text-left">
               <h1 className="text-lg md:text-xl font-extrabold text-white tracking-tight font-sans flex items-center gap-2">
-                ReFURRM <span className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-mono text-emerald-400 border border-white/5 hidden sm:inline-block">L'INK</span>
+                ReFURRM <span className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-mono text-cyan-400 border border-white/5 hidden sm:inline-block">L'INK</span>
               </h1>
-              <p className="text-xs font-mono text-slate-400 tracking-wider uppercase hidden sm:block">Repository Analysis Platform</p>
+              <p className="text-xs font-mono text-slate-500 tracking-wider uppercase hidden sm:block">Repository Analysis Platform</p>
             </div>
           </button>
             <div className="flex items-center gap-4">

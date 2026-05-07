@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
+    "@tailwindcss/vite": "^4.2.4",
     "@types/d3": "^7.4.3",
     "d3": "^7.9.0",
     "firebase": "^12.12.1",
@@ -18,7 +19,8 @@
     "motion": "^12.38.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-markdown": "^10.1.0"
+    "react-markdown": "^10.1.0",
+    "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -17,6 +17,7 @@ const LoginPage: React.FC = () => {
   const handleSocialLogin = async (provider: 'google' | 'github') => {
     setIsAuthenticating(true);
     setError(null);
+    setShowSetupGuide(false);
     try {
       if (provider === 'google') {
         await loginWithGoogle();
@@ -31,8 +32,11 @@ const LoginPage: React.FC = () => {
         setError('Login process was cancelled.');
       } else if (err.code === 'auth/network-request-failed') {
         setError('Network error. Please check your internet connection.');
-      } else if (err.code === 'auth/operation-not-allowed') {
-        setError('This login method is not enabled. Please enable Google/GitHub in your Firebase Console (Authentication > Sign-in method).');
+      } else if (err.code === 'auth/operation-not-allowed' || err.code === 'auth/unauthorized-domain') {
+        setError(err.code === 'auth/operation-not-allowed' 
+          ? 'This login method is not enabled in your Firebase Console.' 
+          : 'This domain is not authorized in your Firebase Console.');
+        setShowSetupGuide(true);
       } else {
         setError(err.message || 'Authentication failed. Please try again.');
       }
@@ -46,35 +50,101 @@ const LoginPage: React.FC = () => {
     setError("Email/Password login is restricted to enterprise accounts. Please use the Access Gateway providers below.");
   };
 
+  const [showSetupGuide, setShowSetupGuide] = useState(false);
+
+  const authorizedDomains = [
+    'ais-dev-6bcfucldq7dzwx2qqxjwer-548351223917.us-east1.run.app',
+    'ais-pre-6bcfucldq7dzwx2qqxjwer-548351223917.us-east1.run.app'
+  ];
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950">
-      {/* Animated background orbs */}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950 logic-map-bg">
+      {/* Animated background elements matching the brand image */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-600/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-0 left-0 w-full h-full opacity-20">
+            {/* Simulation of the complex nodes map from user image */}
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-pink-500 rounded-full shadow-[0_0_10px_theme(colors.pink.500)]" />
+            <div className="absolute top-1/4 left-1/4 w-32 h-[1px] bg-gradient-to-r from-pink-500 to-transparent rotate-45 origin-left" />
+            <div className="absolute top-1/2 right-1/3 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_theme(colors.cyan.400)]" />
+            <div className="absolute top-1/2 right-1/3 w-48 h-[1px] bg-gradient-to-r from-cyan-400 to-transparent -rotate-12 origin-left" />
+            <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_10px_theme(colors.emerald.400)]" />
+        </div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-pink-600/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
       <div className="w-full max-w-md relative">
         {/* Glass card */}
         <div className="glass-panel rounded-3xl p-8 relative overflow-hidden shadow-2xl border border-white/10">
           {/* Accent line */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 via-emerald-400 to-violet-500" />
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-pink-500 via-cyan-400 to-emerald-500" />
 
           {/* Header */}
           <div className="mb-8 text-center relative">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-emerald-500/20 mb-4 shadow-[0_0_20px_-5px_theme(colors.violet.500)]">
-              <Sparkles className="w-8 h-8 text-violet-400" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-slate-900 border border-white/10 mb-6 shadow-2xl group transition-transform hover:scale-105">
+              <img src="/logo-icon.svg" alt="ReFURRM L'INK" className="w-12 h-12" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-400 to-emerald-400 bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent mb-4 text-center tracking-tight">
               ReFURRM L'INK
             </h1>
-            <p className="text-slate-400 text-sm font-mono tracking-tight">Sign in to your account</p>
+            <div className="max-w-xs mx-auto mb-6">
+              <p className="text-slate-400 text-[13px] leading-relaxed text-center font-sans font-medium">
+                ReFURRM L'INK transforms complex repositories into interactive <span className="text-pink-400">Logic Maps</span>. 
+                Identify vulnerabilities, bottlenecks, and architectural rot before production.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 justify-center">
+                <div className="h-px w-8 bg-slate-800" />
+                <p className="text-slate-500 text-[10px] font-mono tracking-[0.2em] uppercase">Security Portal</p>
+                <div className="h-px w-8 bg-slate-800" />
+            </div>
           </div>
 
           {error && (
-            <div className="mb-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              {error}
+            <div className="mb-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+              
+              {showSetupGuide && (
+                <div className="mt-3 p-3 bg-slate-900/80 rounded-lg border border-white/5 space-y-4">
+                  <div>
+                    <p className="text-slate-300 text-[10px] uppercase tracking-wider font-bold mb-2">Step 1: Enable Providers</p>
+                    <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
+                      Go to <strong>Authentication &gt; Sign-in method</strong> and enable <strong>Google</strong> and <strong>GitHub</strong>.
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-slate-300 text-[10px] uppercase tracking-wider font-bold mb-2">Step 2: Authorized Domains</p>
+                    <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
+                      Go to <strong>Authentication &gt; Settings &gt; Authorized domains</strong> and add these:
+                    </p>
+                    <div className="space-y-1">
+                      {authorizedDomains.map(domain => (
+                        <code key={domain} className="block p-1.5 bg-black/50 rounded border border-white/10 text-[9px] text-emerald-400 select-all truncate">
+                          {domain}
+                        </code>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-slate-300 text-[10px] uppercase tracking-wider font-bold mb-2">Step 3: GitHub Callback</p>
+                    <code className="block p-1.5 bg-black/50 rounded border border-white/10 text-[9px] text-cyan-400 break-all select-all">
+                      https://gen-lang-client-0231544530.firebaseapp.com/__/auth/handler
+                    </code>
+                  </div>
+
+                  <button 
+                    onClick={() => window.open('https://console.firebase.google.com/project/gen-lang-client-0231544530/authentication/providers', '_blank')}
+                    className="w-full py-2 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 rounded-md text-[10px] font-bold transition-colors border border-cyan-500/20"
+                  >
+                    OPEN FIREBASE CONSOLE
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -143,9 +213,9 @@ const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={isAuthenticating}
-              className="w-full bg-gradient-to-r from-violet-600 to-emerald-600 hover:from-violet-500 hover:to-emerald-500 text-white font-semibold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-violet-500/10 hover:shadow-violet-500/20 group mt-6 disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-pink-600 to-cyan-600 hover:from-pink-500 hover:to-cyan-500 text-white font-semibold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-pink-500/10 hover:shadow-cyan-500/20 group mt-6 disabled:opacity-50"
             >
-              Sign In
+              Sign In to ReFURRM L'INK
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
 

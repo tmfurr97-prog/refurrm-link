@@ -1,6 +1,11 @@
 {
   "name": "ReFURRM L'INK",
-  "description": "ReFURRM L'INK transforms complex GitHub repositories into interactive Logic Maps. Identify security vulnerabilities, performance bottlenecks, and architectural rot before they reach production.",
+  "description": "ReFURRM L'INK transforms complex GitHub repositories into interactive Logic Maps. Automate code review, identify security vulnerabilities, and streamline debugging with real-time AI logic analysis.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "Code Review Automation",
+    "Real-time Debugging Assistance",
+    "Interactive Logic Mapping",
+    "Security Vulnerability Detection"
+  ]
 }
