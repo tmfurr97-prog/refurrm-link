@@ -7,6 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import D3FlowChart from './D3FlowChart';
 import { DevStudioState, D3Node, ViewMode } from '../types';
 import { askNodeSpecificQuestion } from '../services/geminiService';
+import ForensicChat from './ForensicChat';
 import { Terminal, GitBranch, Cpu, MessageSquare, Zap, Code2, ArrowLeft, Sparkles, Bug, Search } from 'lucide-react';
 
 interface ChatMessage {
@@ -164,61 +165,25 @@ const DevStudio: React.FC<DevStudioProps> = ({ initialState, onNavigate }) => {
          </div>
         
         {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 font-mono text-sm bg-slate-950/30 relative min-h-0">
-            {chatHistory.length === 0 && !chatLoading && (
-                 <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 space-y-4 p-8 text-center opacity-60 pointer-events-none">
-                    <div className="relative">
-                        <Zap className="w-12 h-12 text-indigo-500/50" />
-                        <Sparkles className="w-5 h-5 text-emerald-400/50 absolute -top-1 -right-1 animate-pulse" />
-                    </div>
-                    <p className="text-sm max-w-[250px] leading-relaxed">
-                        Select a node in the graph to unlock context-aware AI debugging and optimization tools.
-                    </p>
-                  </div>
-            )}
-             {chatHistory.map((msg, idx) => (
-                  <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
-                    <div className={`max-w-[90%] p-3 rounded-xl ${
-                      msg.role === 'user' 
-                        ? 'bg-indigo-600/20 text-indigo-100 border border-indigo-500/30 rounded-br-sm shadow-sm' 
-                        : 'bg-slate-800/80 text-slate-200 border border-white/10 rounded-bl-sm shadow-sm'
-                    }`}>
-                        <div className="whitespace-pre-wrap leading-relaxed text-[13px]">{msg.text}</div>
-                    </div>
-                  </div>
-                ))
-              }
-              {chatLoading && (
-                <div className="flex justify-start animate-in fade-in">
-                   <div className="bg-slate-800/80 p-3 rounded-xl rounded-bl-sm border border-white/10 flex items-center gap-1.5">
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-indigo-400/70 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-1.5 h-1.5 bg-indigo-400/70 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-1.5 h-1.5 bg-indigo-400/70 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </div>
-                   </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
+        <div className="flex-1 overflow-auto bg-slate-950/30 relative min-h-0">
+          <ForensicChat 
+            tier="pro" 
+            githubRepoMetadata={initialState?.repoName ? { owner: initialState.repoName.split('/')[0], repo: initialState.repoName.split('/')[1] } : undefined }
+            currentFileContext={{ path: selectedNode?.label || 'Global Architecture', content: 'Node content logic mapping in graph' }}
+            onSendMessage={async (prompt, files) => {
+              const { interrogateCodebase } = await import('../services/askAIService');
+              const result = await interrogateCodebase({
+                prompt,
+                tier: 'pro',
+                githubRepoMetadata: initialState?.repoName ? { owner: initialState.repoName.split('/')[0], repo: initialState.repoName.split('/')[1] } : undefined,
+                currentFileContext: files[0]
+              });
+              return result.response;
+            }} 
+          />
         </div>
 
-        {/* Input Area */}
-        <div className="p-3 bg-slate-950/80 border-t border-white/5 shrink-0">
-              <form onSubmit={handleAskQuestion} className="relative flex items-center glass-panel rounded-xl p-1.5 focus-within:ring-1 ring-indigo-500/50 transition-all bg-black/20">
-                <span className="pl-2 pr-2 text-indigo-500 font-mono flex-shrink-0">{'>'}</span>
-                <input
-                  type="text"
-                  value={questionInput}
-                  onChange={(e) => setQuestionInput(e.target.value)}
-                  placeholder={selectedNode ? `Query ${selectedNode.label}...` : "Select a node..."}
-                  disabled={chatLoading}
-                  className="w-full bg-transparent border-none text-slate-200 placeholder:text-slate-600 focus:ring-0 py-1.5 px-0 font-mono text-sm"
-                />
-                <button type="submit" disabled={!questionInput.trim() || chatLoading} className="p-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 rounded-lg transition-colors disabled:opacity-0 flex-shrink-0">
-                    <MessageSquare className="w-4 h-4" />
-                </button>
-              </form>
-        </div>
+        {/* Input Area logic is now handled internally by ForensicChat */}
       </div>
     </div>
   );
