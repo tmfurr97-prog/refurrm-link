@@ -8,20 +8,6 @@ import { editImageWithGemini } from '../services/geminiService';
 import { ViewMode } from '../types';
 import { Upload, Wand2, Loader2, Download, ImageIcon, Palette, Terminal, ArrowLeft } from 'lucide-react';
 
-const ALLOWED_IMAGE_MIME_TYPES = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/gif'
-]);
-
-const CANONICAL_IMAGE_MIME_TYPES: Record<string, string> = {
-  'image/png': 'image/png',
-  'image/jpeg': 'image/jpeg',
-  'image/webp': 'image/webp',
-  'image/gif': 'image/gif'
-};
-
 const STYLE_PRESETS = [
   "Neon Cyberpunk",
   "Minimalist Blueprint",
@@ -41,6 +27,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
   const [prompt, setPrompt] = useState('');
   const [processing, setProcessing] = useState(false);
   const [editedImageData, setEditedImageData] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -48,23 +35,24 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
       setImageData(initialState.data);
       setMimeType(initialState.mimeType);
       setEditedImageData(null);
+      setError(null);
     }
   }, [initialState]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
-        alert('Please select a valid image file (PNG, JPEG, WEBP, or GIF).');
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file.');
         return;
       }
-      const safeMimeType = CANONICAL_IMAGE_MIME_TYPES[file.type];
+      setError(null);
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
         const base64Data = base64.split(',')[1];
         setImageData(base64Data);
-        setMimeType(safeMimeType);
+        setMimeType(file.type);
         setEditedImageData(null);
       };
       reader.readAsDataURL(file);
@@ -76,15 +64,16 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
     if (!imageData || !prompt) return;
 
     setProcessing(true);
+    setError(null);
     try {
       const resultBase64 = await editImageWithGemini(imageData, mimeType, prompt);
       if (resultBase64) {
         setEditedImageData(resultBase64);
       } else {
-        alert('Could not generate edited image.');
+        setError('Could not generate edited image.');
       }
-    } catch (error) {
-      alert('An error occurred while processing.');
+    } catch (err: any) {
+      setError(err.message || 'An error occurred while processing.');
     } finally {
       setProcessing(false);
     }
@@ -124,7 +113,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
                 <img src={`data:${mimeType};base64,${imageData}`} alt="Source" className="h-full w-full object-contain p-4 relative z-10" />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20 backdrop-blur-md">
                   <p className="text-white font-medium flex items-center gap-2 font-mono text-sm">
-                    <Upload className="w-4 h-4" /> CHANGE_SOURCE
+                    <Upload className="w-4 h-4" /> <span>CHANGE_SOURCE</span>
                   </p>
                 </div>
               </>
@@ -141,7 +130,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
                         onClick={(e) => { e.stopPropagation(); onNavigate(ViewMode.REPO_ANALYZER); }}
                         className="px-4 py-2 bg-white/5 hover:bg-pink-500/10 text-slate-300 hover:text-pink-300 border border-white/10 hover:border-pink-500/30 rounded-lg transition-all text-sm font-mono flex items-center gap-2"
                       >
-                          <Terminal className="w-4 h-4" /> Generate in Analyzer
+                          <Terminal className="w-4 h-4" /> <span>Generate in Analyzer</span>
                       </button>
                   )}
                 </div>
@@ -149,6 +138,14 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
             )}
              <input ref={inputRef} type="file" accept="image/png, image/jpeg" onChange={handleFileChange} className="hidden" />
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-400 text-xs font-mono animate-in fade-in slide-in-from-top-1">
+              <AlertCircle className="w-3.5 h-3.5" />
+              <span>{error}</span>
+            </div>
+          )}
 
           {/* Control Panel */}
           <div className={`glass-panel p-1.5 rounded-3xl transition-all duration-500 ${imageData ? 'opacity-100 translate-y-0' : 'opacity-50 translate-y-4 pointer-events-none filter blur-sm'}`}>
