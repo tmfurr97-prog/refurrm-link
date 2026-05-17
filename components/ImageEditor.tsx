@@ -16,6 +16,13 @@ const STYLE_PRESETS = [
   "Vintage Sci-Fi"
 ];
 
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+]);
+
 interface ImageEditorProps {
   initialState?: { data: string; mimeType: string } | null;
   onNavigate?: (mode: ViewMode) => void;
@@ -42,8 +49,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        setError('Please select a valid image file.');
+      const normalizedMimeType = file.type.trim().toLowerCase();
+      if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
+        setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
         return;
       }
       setError(null);
@@ -52,7 +60,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
         const base64 = reader.result as string;
         const base64Data = base64.split(',')[1];
         setImageData(base64Data);
-        setMimeType(file.type);
+        setMimeType(normalizedMimeType);
         setEditedImageData(null);
       };
       reader.readAsDataURL(file);
