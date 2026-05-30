@@ -4,9 +4,9 @@
 */
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { RepoFileTree, Citation } from '../types';
 
-<<<<<<< HEAD
 interface GeminiResponse {
   content: string;
   usage: { promptTokens: number; candidatesTokens: number };
@@ -32,12 +32,12 @@ export const analyzeContent = async (prompt: string, context: string): Promise<s
     console.error('Gemini Service Error:', error);
     throw new Error('Failed to process AI request. Check backend logs.');
   }
-=======
+};
+
 // Helper to ensure we always get the freshest key
 const getAiClient = () => {
   const userKey = typeof window !== 'undefined' ? localStorage.getItem('REFURRM_API_KEY') : null;
   return new GoogleGenAI({ apiKey: userKey || process.env.GEMINI_API_KEY || '' });
->>>>>>> 15cc6cd091791d9b7ed06d92ce80ef1b1c7f19f4
 };
 
 export interface InfographicResult {
