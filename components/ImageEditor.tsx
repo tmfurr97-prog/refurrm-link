@@ -132,7 +132,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
                 </div>
                 <div>
                   <p className="text-slate-300 font-medium text-lg font-sans">Drop source image</p>
-                  <p className="text-slate-500 text-xs mt-2 font-mono uppercase tracking-wider mb-4">PNG / JPG supported</p>
+                  <p className="text-slate-500 text-xs mt-2 font-mono uppercase tracking-wider mb-4">PNG / JPG / WEBP / GIF supported</p>
                   {onNavigate && (
                       <button 
                         onClick={(e) => { e.stopPropagation(); onNavigate(ViewMode.REPO_ANALYZER); }}
@@ -144,7 +144,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
                 </div>
               </div>
             )}
-             <input ref={inputRef} type="file" accept="image/png, image/jpeg" onChange={handleFileChange} className="hidden" />
+             <input
+               ref={inputRef}
+               type="file"
+               accept="image/png, image/jpeg, image/webp, image/gif"
+               onChange={handleFileChange}
+               className="hidden"
+             />
           </div>
 
           {/* Error Message */}
