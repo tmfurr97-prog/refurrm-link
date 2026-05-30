@@ -39,8 +39,16 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
 
   useEffect(() => {
     if (initialState) {
+      const normalizedMimeType = initialState.mimeType.trim().toLowerCase();
+      if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
+        setImageData(null);
+        setMimeType('');
+        setEditedImageData(null);
+        setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
+        return;
+      }
       setImageData(initialState.data);
-      setMimeType(initialState.mimeType);
+      setMimeType(normalizedMimeType);
       setEditedImageData(null);
       setError(null);
     }
@@ -51,7 +59,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
     if (file) {
       const normalizedMimeType = file.type.trim().toLowerCase();
       if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
+        setImageData(null);
+        setMimeType('');
+        setEditedImageData(null);
         setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
+        e.target.value = '';
         return;
       }
       setError(null);
