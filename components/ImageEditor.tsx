@@ -39,8 +39,16 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
 
   useEffect(() => {
     if (initialState) {
+      const normalizedMimeType = initialState.mimeType.trim().toLowerCase();
+      if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
+        setImageData(null);
+        setMimeType('');
+        setEditedImageData(null);
+        setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
+        return;
+      }
       setImageData(initialState.data);
-      setMimeType(initialState.mimeType);
+      setMimeType(normalizedMimeType);
       setEditedImageData(null);
       setError(null);
     }
@@ -51,7 +59,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
     if (file) {
       const normalizedMimeType = file.type.trim().toLowerCase();
       if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
+        setImageData(null);
+        setMimeType('');
+        setEditedImageData(null);
         setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
+        e.target.value = '';
         return;
       }
       setError(null);
@@ -132,7 +144,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
                 </div>
                 <div>
                   <p className="text-slate-300 font-medium text-lg font-sans">Drop source image</p>
-                  <p className="text-slate-500 text-xs mt-2 font-mono uppercase tracking-wider mb-4">PNG / JPG supported</p>
+                  <p className="text-slate-500 text-xs mt-2 font-mono uppercase tracking-wider mb-4">PNG / JPG / WEBP / GIF supported</p>
                   {onNavigate && (
                       <button 
                         onClick={(e) => { e.stopPropagation(); onNavigate(ViewMode.REPO_ANALYZER); }}
@@ -144,7 +156,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
                 </div>
               </div>
             )}
-             <input ref={inputRef} type="file" accept="image/png, image/jpeg" onChange={handleFileChange} className="hidden" />
+             <input
+               ref={inputRef}
+               type="file"
+               accept="image/png, image/jpeg, image/webp, image/gif"
+               onChange={handleFileChange}
+               className="hidden"
+             />
           </div>
 
           {/* Error Message */}
