@@ -55,8 +55,6 @@ const LANGUAGES = [
   { label: "Chinese (China)", value: "Chinese" },
 ];
 
-const ADMIN_EMAILS = ['harleygirley97@gmail.com', 'tree@refurrm.org', 'admin@refurrm.org'];
-
 const AuditSection: React.FC<{ 
   title: string; 
   content: string; 

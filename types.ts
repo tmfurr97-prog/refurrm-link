@@ -41,6 +41,7 @@ export interface RepoFileTree {
   type: string;
   url?: string;
   sha?: string;
+  size?: number;
 }
 
 export interface DevStudioState {

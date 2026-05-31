@@ -6,7 +6,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { editImageWithGemini } from '../services/geminiService';
 import { ViewMode } from '../types';
-import { Upload, Wand2, Loader2, Download, ImageIcon, Palette, Terminal, ArrowLeft } from 'lucide-react';
+import { Upload, Wand2, Loader2, Download, ImageIcon, Palette, Terminal, AlertCircle } from 'lucide-react';
 
 const STYLE_PRESETS = [
   "Neon Cyberpunk",
