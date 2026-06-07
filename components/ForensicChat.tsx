@@ -12,6 +12,7 @@ export interface ForensicMessage {
 export interface ForensicChatProps {
   tier?: 'standard' | 'pro';
   currentFileContext?: { path: string; content: string };
+  githubRepoMetadata?: { owner: string; repo: string };
   onSendMessage?: (prompt: string, files: any[]) => Promise<string>;
 }
 

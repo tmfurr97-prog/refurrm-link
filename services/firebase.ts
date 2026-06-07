@@ -68,7 +68,6 @@ export async function syncUserProfile(user: User) {
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
-        isAdmin: false, // Default to false
         createdAt: serverTimestamp(),
         lastLogin: serverTimestamp()
       });

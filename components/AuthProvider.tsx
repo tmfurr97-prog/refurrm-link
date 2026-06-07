@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
+import { User, getIdTokenResult, onIdTokenChanged } from 'firebase/auth';
 import { auth, syncUserProfile } from '../services/firebase';
 
 interface AuthContextType {
@@ -18,20 +18,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
-        // Sync profile
-        await syncUserProfile(user);
-        
-        // Basic admin check (could be enhanced with a Firestore lookup)
-        // For now, we'll use the hardcoded admin emails as a secondary check if needed
-        const admins = ['harleygirley97@gmail.com', 'tree@refurrm.org', 'admin@refurrm.org'];
-        setIsAdmin(admins.includes(user.email || ''));
-      } else {
+    const unsubscribe = onIdTokenChanged(auth, async (nextUser) => {
+      setUser(nextUser);
+      if (!nextUser) {
         setIsAdmin(false);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        await syncUserProfile(nextUser);
+      } catch (error) {
+        console.error('Profile sync failed:', error);
+      }
+
+      try {
+        const tokenResult = await getIdTokenResult(nextUser);
+        setIsAdmin(tokenResult.claims.admin === true);
+      } catch (error) {
+        console.error('Failed to read auth claims:', error);
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
     });
 
     return () => unsubscribe();
