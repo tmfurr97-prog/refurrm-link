@@ -3,10 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
+import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { GoogleGenAI, Modality } from "@google/genai";
 import { RepoFileTree, Citation } from '../types';
 import { isClientAiEnabled } from './runtimeConfig';
 
+interface GeminiResponse {
+  content: string;
+  usage: { promptTokens: number; candidatesTokens: number };
+}
 // Helper to ensure we always get the freshest key
 const getAiClient = () => {
   if (!isClientAiEnabled) {
@@ -39,6 +45,12 @@ export const analyzeContent = async (prompt: string, context: string): Promise<s
     console.error('Gemini Service Error:', error);
     throw new Error('Failed to process AI request.');
   }
+};
+
+// Helper to ensure we always get the freshest key
+const getAiClient = () => {
+  const userKey = typeof window !== 'undefined' ? localStorage.getItem('REFURRM_API_KEY') : null;
+  return new GoogleGenAI({ apiKey: userKey || process.env.GEMINI_API_KEY || '' });
 };
 
 export interface InfographicResult {

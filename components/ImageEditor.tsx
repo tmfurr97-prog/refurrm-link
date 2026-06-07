@@ -39,11 +39,23 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
 
   useEffect(() => {
     if (initialState) {
+      if (!initialState.mimeType) {
+        setImageData(null);
+        setMimeType('');
+        setEditedImageData(null);
+        setError('Unsupported saved image type. Please upload a valid PNG, JPEG, WEBP, or GIF image.');
+        return;
+      }
+
       const normalizedMimeType = initialState.mimeType.trim().toLowerCase();
       if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
         setImageData(null);
         setMimeType('');
         setEditedImageData(null);
+        setError('Unsupported saved image type. Please upload a valid PNG, JPEG, WEBP, or GIF image.');
+        return;
+      }
+
         setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
         return;
       }
