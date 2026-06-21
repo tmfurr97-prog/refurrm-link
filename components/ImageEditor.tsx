@@ -44,7 +44,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
         setImageData(null);
         setMimeType('');
         setEditedImageData(null);
-        setError('Unsupported saved image type. Please upload a valid PNG, JPEG, WEBP, or GIF image.');
+        setError('Unsupported saved image type. Please provide a valid PNG, JPEG, WEBP, or GIF image.');
         return;
       }
       setImageData(initialState.data);
