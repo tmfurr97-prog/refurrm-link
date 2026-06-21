@@ -56,14 +56,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
         return;
       }
 
-      if (!initialState.data) {
-        setImageData(null);
-        setMimeType('');
-        setEditedImageData(null);
-        setError('Saved image data is unavailable. Please upload a valid PNG, JPEG, WEBP, or GIF image.');
+        setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
         return;
       }
-
       setImageData(initialState.data);
       setMimeType(normalizedMimeType);
       setEditedImageData(null);
