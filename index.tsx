@@ -7,7 +7,6 @@ import ReactDOM from 'react-dom/client';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import App from './App';
 import { AuthProvider } from './components/AuthProvider';
-import { AppErrorBoundary } from './components/AppErrorBoundary';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -17,12 +16,10 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ''}>
-      <AppErrorBoundary>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </AppErrorBoundary>
+    <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6Ldimd0sAAAAAG7HBcpnaYeAkf2IWmfA2eopusnT"}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </GoogleReCaptchaProvider>
   </React.StrictMode>
 );

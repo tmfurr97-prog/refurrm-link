@@ -6,7 +6,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { editImageWithGemini } from '../services/geminiService';
 import { ViewMode } from '../types';
-import { Upload, Wand2, Loader2, Download, ImageIcon, Palette, Terminal, AlertCircle } from 'lucide-react';
+import { Upload, Wand2, Loader2, Download, ImageIcon, Palette, Terminal, ArrowLeft } from 'lucide-react';
 
 const STYLE_PRESETS = [
   "Neon Cyberpunk",
@@ -15,13 +15,6 @@ const STYLE_PRESETS = [
   "Futuristic HUD",
   "Vintage Sci-Fi"
 ];
-
-const ALLOWED_IMAGE_MIME_TYPES = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/gif',
-]);
 
 interface ImageEditorProps {
   initialState?: { data: string; mimeType: string } | null;
@@ -39,28 +32,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
 
   useEffect(() => {
     if (initialState) {
-      if (!initialState.mimeType) {
-        setImageData(null);
-        setMimeType('');
-        setEditedImageData(null);
-        setError('Unsupported saved image type. Please upload a valid PNG, JPEG, WEBP, or GIF image.');
-        return;
-      }
-
-      const normalizedMimeType = initialState.mimeType.trim().toLowerCase();
-      if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
-        setImageData(null);
-        setMimeType('');
-        setEditedImageData(null);
-        setError('Unsupported saved image type. Please upload a valid PNG, JPEG, WEBP, or GIF image.');
-        return;
-      }
-
-        setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
-        return;
-      }
       setImageData(initialState.data);
-      setMimeType(normalizedMimeType);
+      setMimeType(initialState.mimeType);
       setEditedImageData(null);
       setError(null);
     }
@@ -69,13 +42,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const normalizedMimeType = file.type.trim().toLowerCase();
-      if (!ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
-        setImageData(null);
-        setMimeType('');
-        setEditedImageData(null);
-        setError('Please select a valid PNG, JPEG, WEBP, or GIF image file.');
-        e.target.value = '';
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file.');
         return;
       }
       setError(null);
@@ -84,7 +52,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
         const base64 = reader.result as string;
         const base64Data = base64.split(',')[1];
         setImageData(base64Data);
-        setMimeType(normalizedMimeType);
+        setMimeType(file.type);
         setEditedImageData(null);
       };
       reader.readAsDataURL(file);
@@ -156,7 +124,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
                 </div>
                 <div>
                   <p className="text-slate-300 font-medium text-lg font-sans">Drop source image</p>
-                  <p className="text-slate-500 text-xs mt-2 font-mono uppercase tracking-wider mb-4">PNG / JPG / WEBP / GIF supported</p>
+                  <p className="text-slate-500 text-xs mt-2 font-mono uppercase tracking-wider mb-4">PNG / JPG supported</p>
                   {onNavigate && (
                       <button 
                         onClick={(e) => { e.stopPropagation(); onNavigate(ViewMode.REPO_ANALYZER); }}
@@ -168,13 +136,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
                 </div>
               </div>
             )}
-             <input
-               ref={inputRef}
-               type="file"
-               accept="image/png, image/jpeg, image/webp, image/gif"
-               onChange={handleFileChange}
-               className="hidden"
-             />
+             <input ref={inputRef} type="file" accept="image/png, image/jpeg" onChange={handleFileChange} className="hidden" />
           </div>
 
           {/* Error Message */}
