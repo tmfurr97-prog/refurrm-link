@@ -4,48 +4,7 @@
 */
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { GoogleGenAI, Modality } from "@google/genai";
 import { RepoFileTree, Citation } from '../types';
-import { isClientAiEnabled } from './runtimeConfig';
-
-interface GeminiResponse {
-  content: string;
-  usage: { promptTokens: number; candidatesTokens: number };
-}
-// Helper to ensure we always get the freshest key
-const getAiClient = () => {
-  if (!isClientAiEnabled) {
-    throw new Error('Client-side AI is disabled. Configure backend AI proxy or enable VITE_ENABLE_CLIENT_AI=true for development only.');
-  }
-
-  const userKey = typeof window !== 'undefined' ? localStorage.getItem('REFURRM_API_KEY') : null;
-  const apiKey = userKey?.trim();
-
-  if (!apiKey) {
-    throw new Error('Missing Gemini API key. Add one from the API key modal before running analysis.');
-  }
-
-  return new GoogleGenAI({ apiKey });
-};
-
-export const analyzeContent = async (prompt: string, context: string): Promise<string> => {
-  const ai = getAiClient();
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.1-pro-preview',
-      contents: {
-        parts: [{ text: `${prompt}\n\n${context}` }],
-      },
-    });
-
-    return response.text || 'No response returned.';
-  } catch (error) {
-    console.error('Gemini Service Error:', error);
-    throw new Error('Failed to process AI request.');
-  }
-};
 
 // Helper to ensure we always get the freshest key
 const getAiClient = () => {

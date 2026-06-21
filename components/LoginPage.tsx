@@ -7,7 +7,6 @@ import React, { useState, useCallback } from 'react';
 import { Mail, Lock, Sparkles, ArrowRight, Github, Loader2, AlertCircle, Shield, Scale } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { loginWithGoogle, loginWithGithub } from '../services/firebase';
-import { verifyRecaptchaToken } from '../services/securityService';
 
 interface LoginPageProps {
   onTogglePrivacy?: () => void;
@@ -36,10 +35,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
       const token = await executeRecaptcha('login');
       if (!token) {
         throw new Error("Failed to verify user authenticity.");
-      }
-      const isHuman = await verifyRecaptchaToken(token);
-      if (!isHuman) {
-        throw new Error("Security verification failed. Please try again.");
       }
 
       if (provider === 'google') {

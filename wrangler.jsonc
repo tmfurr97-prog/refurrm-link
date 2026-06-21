@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "refurrm-link",
-  "compatibility_date": "2026-05-31",
+  "compatibility_date": "2026-06-21",
   "observability": {
     "enabled": true
   },
