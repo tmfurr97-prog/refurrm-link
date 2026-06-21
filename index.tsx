@@ -14,15 +14,27 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
+const reCaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY?.trim();
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ''}>
-      <AppErrorBoundary>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </AppErrorBoundary>
-    </GoogleReCaptchaProvider>
+    {reCaptchaSiteKey ? (
+      <GoogleReCaptchaProvider reCaptchaKey={reCaptchaSiteKey}>
+        <AppErrorBoundary>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </AppErrorBoundary>
+      </GoogleReCaptchaProvider>
+    ) : (
+      <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+          <h1 className="text-lg font-semibold text-white">Missing reCAPTCHA Configuration</h1>
+          <p className="text-sm text-slate-400 mt-2">
+            Set <code>VITE_RECAPTCHA_SITE_KEY</code> before loading the application.
+          </p>
+        </div>
+      </div>
+    )}
   </React.StrictMode>
 );
