@@ -5,12 +5,34 @@
 import { RepoFileTree } from '../types';
 
 export async function fetchRepoFileTree(owner: string, repo: string): Promise<RepoFileTree[]> {
+  const getHeaders = () => {
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('github_access_token') : null;
+    return token ? { Authorization: `token ${token}` } : {};
+  };
+
+  // First attempt to fetch repo info to get the actual default branch
+  let defaultBranch = 'main';
+  try {
+    const repoInfoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: getHeaders() });
+    if (repoInfoResponse.status === 403 || repoInfoResponse.status === 429) {
+      throw new Error('GitHub API rate limit exceeded. Please try again later.');
+    }
+    if (repoInfoResponse.ok) {
+      const repoInfo = await repoInfoResponse.json();
+      if (repoInfo.default_branch) {
+        defaultBranch = repoInfo.default_branch;
+      }
+    }
+  } catch (error: any) {
+    if (error.message.includes('rate limit')) throw error;
+  }
+
   // Common default branch names to try
-  const branches = ['main', 'master'];
+  const branches = [...new Set([defaultBranch, 'main', 'master'])];
 
   for (const branch of branches) {
     try {
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`);
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`, { headers: getHeaders() });
 
       if (response.ok) {
         const data = await response.json();
@@ -55,7 +77,10 @@ export async function fetchRepoFileTree(owner: string, repo: string): Promise<Re
 }
 
 export async function fetchFileContent(blobUrl: string): Promise<string> {
-  const response = await fetch(blobUrl);
+  const token = typeof window !== 'undefined' ? sessionStorage.getItem('github_access_token') : null;
+  const headers = token ? { Authorization: `token ${token}` } : {};
+  
+  const response = await fetch(blobUrl, { headers });
   if (!response.ok) {
     throw new Error('Failed to fetch file content from GitHub.');
   }

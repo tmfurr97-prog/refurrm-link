@@ -6,7 +6,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { editImageWithGemini } from '../services/geminiService';
 import { ViewMode } from '../types';
-import { Upload, Wand2, Loader2, Download, ImageIcon, Palette, Terminal, AlertCircle } from 'lucide-react';
+import { Upload, Wand2, Loader2, Download, ImageIcon, Palette, Terminal, ArrowLeft, AlertCircle } from 'lucide-react';
 
 const STYLE_PRESETS = [
   "Neon Cyberpunk",
@@ -15,13 +15,6 @@ const STYLE_PRESETS = [
   "Futuristic HUD",
   "Vintage Sci-Fi"
 ];
-
-const ALLOWED_IMAGE_MIME_TYPES = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/gif',
-]);
 
 interface ImageEditorProps {
   initialState?: { data: string; mimeType: string } | null;
@@ -39,16 +32,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
 
   useEffect(() => {
     if (initialState) {
-      const normalizedMimeType = initialState.mimeType?.trim().toLowerCase();
-      if (!normalizedMimeType || !ALLOWED_IMAGE_MIME_TYPES.has(normalizedMimeType)) {
-        setImageData(null);
-        setMimeType('');
-        setEditedImageData(null);
-        setError('Unsupported saved image type. Please provide a valid PNG, JPEG, WEBP, or GIF image.');
-        return;
-      }
       setImageData(initialState.data);
-      setMimeType(normalizedMimeType);
+      setMimeType(initialState.mimeType);
       setEditedImageData(null);
       setError(null);
     }

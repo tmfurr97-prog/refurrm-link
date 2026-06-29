@@ -16,7 +16,16 @@ export const githubProvider = new GithubAuthProvider();
 
 // Auth Helpers
 export const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
-export const loginWithGithub = () => signInWithPopup(auth, githubProvider);
+export const loginWithGithub = async () => {
+  githubProvider.addScope('repo');
+  const result = await signInWithPopup(auth, githubProvider);
+  const credential = GithubAuthProvider.credentialFromResult(result);
+  const token = credential?.accessToken;
+  if (token) {
+    sessionStorage.setItem('github_access_token', token);
+  }
+  return result;
+};
 export const logout = () => signOut(auth);
 
 // Firestore Error Handler
@@ -60,6 +69,9 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 // User Profile Helpers
 export async function syncUserProfile(user: User) {
   const userDocRef = doc(db, 'users', user.uid);
+  const admins = ['harleygirley97@gmail.com', 'tree@refurrm.org', 'admin@refurrm.org'];
+  const isAdmin = admins.includes(user.email || '');
+
   try {
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
@@ -68,7 +80,8 @@ export async function syncUserProfile(user: User) {
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
-        isAdmin: false, // Default to false
+        isAdmin: isAdmin,
+        proAccess: isAdmin, // Give pro access to admins
         createdAt: serverTimestamp(),
         lastLogin: serverTimestamp()
       });
@@ -76,7 +89,9 @@ export async function syncUserProfile(user: User) {
       await setDoc(userDocRef, {
         lastLogin: serverTimestamp(),
         displayName: user.displayName,
-        photoURL: user.photoURL
+        photoURL: user.photoURL,
+        isAdmin: isAdmin,
+        proAccess: isAdmin
       }, { merge: true });
     }
   } catch (error) {

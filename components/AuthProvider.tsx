@@ -6,9 +6,10 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
+  proAccess: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, isAdmin: false });
+const AuthContext = createContext<AuthContextType>({ user: null, loading: true, isAdmin: false, proAccess: false });
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -16,6 +17,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [proAccess, setProAccess] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -27,9 +29,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Basic admin check (could be enhanced with a Firestore lookup)
         // For now, we'll use the hardcoded admin emails as a secondary check if needed
         const admins = ['harleygirley97@gmail.com', 'tree@refurrm.org', 'admin@refurrm.org'];
-        setIsAdmin(admins.includes(user.email || ''));
+        const isUserAdmin = admins.includes(user.email || '');
+        setIsAdmin(isUserAdmin);
+        setProAccess(isUserAdmin); // Give pro access to admins
       } else {
         setIsAdmin(false);
+        setProAccess(false);
       }
       setLoading(false);
     });
@@ -38,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, proAccess }}>
       {children}
     </AuthContext.Provider>
   );
