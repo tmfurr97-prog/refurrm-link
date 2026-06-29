@@ -16,6 +16,15 @@ const STYLE_PRESETS = [
   "Vintage Sci-Fi"
 ];
 
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/gif',
+  'image/bmp'
+]);
+
 interface ImageEditorProps {
   initialState?: { data: string; mimeType: string } | null;
   onNavigate?: (mode: ViewMode) => void;
@@ -42,8 +51,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        setError('Please select a valid image file.');
+      if (!ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
+        setError('Please select a valid image file (PNG, JPEG, WEBP, GIF, or BMP).');
         return;
       }
       setError(null);
