@@ -11,7 +11,7 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
 // Initialize App Check
 export const appCheck = typeof window !== 'undefined' ? initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"),
+  provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY?.trim() ? import.meta.env.VITE_RECAPTCHA_SITE_KEY : "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"),
   isTokenAutoRefreshEnabled: true
 }) : null;
 

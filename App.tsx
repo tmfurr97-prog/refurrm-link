@@ -47,6 +47,10 @@ const App: React.FC = () => {
       setCheckingKey(false);
     };
     checkKey();
+
+    const handleLoginTrigger = () => setCurrentView(ViewMode.LOGIN);
+    document.addEventListener('trigger-login', handleLoginTrigger);
+    return () => document.removeEventListener('trigger-login', handleLoginTrigger);
   }, []);
 
   const handleNavigate = (mode: ViewMode) => {
@@ -61,6 +65,12 @@ const App: React.FC = () => {
     setArticleHistory(prev => [item, ...prev]);
   };
 
+  useEffect(() => {
+    if (user && currentView === ViewMode.LOGIN) {
+      setCurrentView(ViewMode.HOME);
+    }
+  }, [user, currentView]);
+
   if (checkingKey || loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -74,7 +84,7 @@ const App: React.FC = () => {
     );
   }
 
-  if (!user && (currentView === ViewMode.REPO_ANALYZER || currentView === ViewMode.ARTICLE_INFOGRAPHIC || currentView === ViewMode.LOGIN)) {
+  if (currentView === ViewMode.LOGIN && !user) {
     return <LoginPage onTogglePrivacy={() => setCurrentView(ViewMode.PRIVACY)} onToggleTerms={() => setCurrentView(ViewMode.TERMS)} />;
   }
 
@@ -97,14 +107,14 @@ const App: React.FC = () => {
             onClick={() => setCurrentView(ViewMode.HOME)}
             className="flex items-center gap-3 md:gap-4 group transition-opacity hover:opacity-80"
           >
-            <div className="relative flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-xl bg-slate-900 border border-white/10 shadow-inner group-hover:border-pink-500/50 transition-colors overflow-hidden">
-               <img src="/logo-icon.svg" alt="RFL" className="w-6 h-6 md:w-8 md:h-8" />
+            <div className="relative flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl bg-slate-900 border border-white/10 shadow-inner group-hover:border-pink-500/50 transition-colors overflow-hidden">
+               <img src="/logo-icon.svg" alt="RFL" className="w-7 h-7 md:w-10 md:h-10" />
             </div>
             <div className="text-left">
-              <h1 className="text-lg md:text-xl font-extrabold text-white tracking-tight font-sans flex items-center gap-2">
-                ReFURRM <span className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-mono text-cyan-400 border border-white/5 hidden sm:inline-block">L'INK</span>
+              <h1 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight font-mono flex items-baseline gap-2">
+                L'iNk
               </h1>
-              <p className="text-xs font-mono text-slate-500 tracking-wider uppercase hidden sm:block">Repository Analysis Platform</p>
+              <p className="text-[10px] md:text-xs font-mono text-slate-500 tracking-wider uppercase hidden sm:block mt-0.5">Repository Analysis Platform</p>
             </div>
           </button>
             <div className="flex items-center gap-4">

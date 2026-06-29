@@ -5,7 +5,6 @@
 
 import React, { useState, useCallback } from 'react';
 import { Mail, Lock, Sparkles, ArrowRight, Github, Loader2, AlertCircle, Shield, Scale } from 'lucide-react';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { loginWithGoogle, loginWithGithub, loginWithEmail, signupWithEmail } from '../services/firebase';
 
 interface LoginPageProps {
@@ -14,7 +13,6 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms }) => {
-  const { executeRecaptcha } = useGoogleReCaptcha();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [focused, setFocused] = useState<string | null>(null);
@@ -23,21 +21,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
   const [isSignUp, setIsSignUp] = useState(false);
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {
-    if (!executeRecaptcha) {
-      setError("Security verification failed to initialize.");
-      return;
-    }
-
     setIsAuthenticating(true);
     setError(null);
     setShowSetupGuide(false);
     
     try {
-      const token = await executeRecaptcha('login');
-      if (!token) {
-        throw new Error("Failed to verify user authenticity.");
-      }
-
       if (provider === 'google') {
         await loginWithGoogle();
       } else {
@@ -66,10 +54,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!executeRecaptcha) {
-      setError("Security verification failed to initialize.");
-      return;
-    }
     if (!email || !password) {
       setError("Please enter both email and password.");
       return;
@@ -80,9 +64,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
     setShowSetupGuide(false);
 
     try {
-      const token = await executeRecaptcha('login');
-      if (!token) throw new Error("Failed to verify user authenticity.");
-
       if (isSignUp) {
         await signupWithEmail(email, password);
       } else {

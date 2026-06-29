@@ -17,7 +17,17 @@ export const UserMenu: React.FC = () => {
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <button
+        onClick={() => document.dispatchEvent(new CustomEvent('trigger-login'))}
+        className="flex items-center gap-2 px-4 py-1.5 md:py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[10px] md:text-xs uppercase tracking-widest hover:bg-emerald-500/20 transition-all shadow-glass"
+      >
+        <UserIcon className="w-3.5 h-3.5" />
+        Sign In
+      </button>
+    );
+  }
 
   return (
     <div className="relative">

@@ -9,7 +9,7 @@ import { generateInfographic, analyzeRepoCodebase, generateRemasteredFiles, Code
 import { RepoFileTree, ViewMode, RepoHistoryItem } from '../types';
 import { useAuth } from './AuthProvider';
 import { saveAuditLog } from '../services/firebase';
-import { AlertCircle, Loader2, Layers, Box, Download, Sparkles, Command, Palette, Globe, Clock, Maximize, KeyRound, ShieldCheck, Activity, Lightbulb, Zap, Code, Copy, Check, ChevronDown, ChevronRight, Shield, Rocket, Cpu } from 'lucide-react';
+import { AlertCircle, Loader2, Layers, Box, Download, Sparkles, Command, Palette, Globe, Clock, Maximize, KeyRound, ShieldCheck, Activity, Lightbulb, Zap, Code, Copy, Check, ChevronDown, ChevronRight, Shield, Rocket, Cpu, Lock } from 'lucide-react';
 import { LoadingState } from './LoadingState';
 import ImageViewer from './ImageViewer';
 import ReactMarkdown from 'react-markdown';
@@ -63,7 +63,8 @@ const AuditSection: React.FC<{
   icon: React.ReactNode; 
   color: string;
   defaultOpen?: boolean;
-}> = ({ title, content, icon, color, defaultOpen = false }) => {
+  isAuthenticated: boolean;
+}> = ({ title, content, icon, color, defaultOpen = false, isAuthenticated }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   if (!content.trim()) return null;
@@ -89,8 +90,16 @@ const AuditSection: React.FC<{
       </button>
       
       {isOpen && (
-        <div className="px-5 pb-5 pt-0 animate-in slide-in-from-top-2 duration-300">
-          <div className="prose prose-invert prose-emerald max-w-none prose-sm font-sans selection:bg-emerald-500/30 markdown-body">
+        <div className="px-5 pb-5 pt-0 animate-in slide-in-from-top-2 duration-300 relative">
+          {!isAuthenticated && (
+            <div className="absolute inset-0 z-10 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center pt-4">
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full font-mono text-xs text-white">
+                <Lock className="w-3 h-3 text-emerald-400" />
+                SIGN IN REQUIRED FOR FULL DIAGNOSTICS
+              </div>
+            </div>
+          )}
+          <div className={`prose prose-invert prose-emerald max-w-none prose-sm font-sans selection:bg-emerald-500/30 markdown-body ${!isAuthenticated ? 'opacity-30 pointer-events-none select-none h-32 overflow-hidden' : ''}`}>
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
         </div>
@@ -258,11 +267,6 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user) {
-      setError('AUTHENTICATION_REQUIRED: Large-scale neural analysis requires a secure session. Please Sign In via the gateway at the top of the page.');
-      return;
-    }
-
     setError(null);
     setInfographicData(null);
     setInfographic3DData(null);
@@ -347,6 +351,10 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
   };
 
   const handleRemaster = async () => {
+    if (!user) {
+      setError('AUTHENTICATION_REQUIRED: Automated code remastering requires an account. Please sign in via the gateway above.');
+      return;
+    }
     if (!currentRepoName || !currentFileTree || !analysisResult) return;
     setRemastering(true);
     try {
@@ -398,6 +406,10 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
   };
 
   const handleCopyHandoff = () => {
+    if (!user) {
+      setError('AUTHENTICATION_REQUIRED: Exporting targeted AI handoff prompts requires an account. Please sign in via the gateway above.');
+      return;
+    }
     handleCopy(generateHandoffPrompt());
     setShowHandoff(true);
     setTimeout(() => setShowHandoff(false), 3000);
@@ -932,8 +944,17 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="bg-emerald-500/5 rounded-xl border border-emerald-500/10 p-5 h-[250px] overflow-auto prose prose-invert prose-xs max-w-none scrollbar-hide">
-                                            <div className="space-y-4">
+                                        <div className="bg-emerald-500/5 rounded-xl border border-emerald-500/10 p-5 h-[250px] overflow-auto prose prose-invert prose-xs max-w-none scrollbar-hide relative">
+                                            {!user && (
+                                                <div className="absolute inset-0 z-10 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center">
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <Lock className="w-5 h-5 text-emerald-400" />
+                                                        <p className="font-mono text-xs text-white">SIGN IN REQUIRED</p>
+                                                        <p className="font-sans text-[10px] text-slate-400">Unlock detailed line-by-line node diagnostics.</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <div className={`space-y-4 ${!user ? 'opacity-30 pointer-events-none select-none overflow-hidden h-full' : ''}`}>
                                                 <ReactMarkdown>
                                                     {getFileSpecificFindings(selectedNodePath)}
                                                 </ReactMarkdown>
@@ -955,24 +976,28 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                         icon={<Shield className="w-4 h-4 text-red-400" />} 
                                         color="bg-red-500 border-red-500"
                                         defaultOpen={true}
+                                        isAuthenticated={!!user}
                                     />
                                     <AuditSection 
                                         title="PERFORMANCE_METRICS" 
                                         content={sections['PERFORMANCE']} 
                                         icon={<Zap className="w-4 h-4 text-emerald-400" />} 
                                         color="bg-emerald-500 border-emerald-500"
+                                        isAuthenticated={!!user}
                                     />
                                     <AuditSection 
                                         title="ARCHITECTURAL_HEALTH" 
                                         content={sections['ARCHITECTURE']} 
                                         icon={<Cpu className="w-4 h-4 text-blue-400" />} 
                                         color="bg-blue-500 border-blue-500"
+                                        isAuthenticated={!!user}
                                     />
                                     <AuditSection 
                                         title="DEVELOPMENT_ROADMAP" 
                                         content={sections['ROADMAP']} 
                                         icon={<Rocket className="w-4 h-4 text-amber-400" />} 
                                         color="bg-amber-500 border-amber-500"
+                                        isAuthenticated={!!user}
                                     />
                                     {sections['GENERAL'] && (
                                         <AuditSection 
@@ -980,6 +1005,7 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                             content={sections['GENERAL']} 
                                             icon={<Activity className="w-4 h-4 text-slate-400" />} 
                                             color="bg-slate-500 border-slate-500"
+                                            isAuthenticated={!!user}
                                         />
                                     )}
                                 </>
@@ -991,18 +1017,22 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                 <Lightbulb className="w-3 h-3" /> Report generated via SiteSketch AI Engine - High Fidelity Mode
                             </div>
                             <div className="flex items-center gap-3">
-                                <button 
-                                    onClick={() => handleDownloadFile(`${currentRepoName}-intelligence-report.md`, analysisResult.report)}
-                                    className="text-[10px] font-mono text-slate-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5"
-                                >
-                                    <Download className="w-3 h-3" /> DOWNLOAD_REPORT
-                                </button>
-                                <button 
-                                    onClick={() => handleCopy(analysisResult.report)}
-                                    className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1.5"
-                                >
-                                    <Copy className="w-3 h-3" /> COPY_FULL_REPORT
-                                </button>
+                                {user && (
+                                    <>
+                                        <button 
+                                            onClick={() => handleDownloadFile(`${currentRepoName}-intelligence-report.md`, analysisResult.report)}
+                                            className="text-[10px] font-mono text-slate-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                                        >
+                                            <Download className="w-3 h-3" /> DOWNLOAD_REPORT
+                                        </button>
+                                        <button 
+                                            onClick={() => handleCopy(analysisResult.report)}
+                                            className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1.5"
+                                        >
+                                            <Copy className="w-3 h-3" /> COPY_FULL_REPORT
+                                        </button>
+                                    </>
+                                )}
                                 <button 
                                     onClick={() => setAnalysisResult(null)}
                                     className="text-[10px] font-mono text-slate-500 hover:text-red-500/60 transition-colors underline underline-offset-4"

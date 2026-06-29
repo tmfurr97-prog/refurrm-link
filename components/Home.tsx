@@ -16,12 +16,16 @@ const Home: React.FC<HomeProps> = ({ onNavigate }) => {
     <div className="max-w-4xl mx-auto space-y-12 mb-12">
       {/* Hero Section */}
       <div className="text-center space-y-4 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-        <h1 className="text-4xl md:text-7xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-cyan-400 to-emerald-400 font-sans leading-tight">
-          ReFURRM L'INK
+        <h1 className="text-4xl md:text-7xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-cyan-400 to-emerald-400 font-mono leading-tight">
+          L'iNk
         </h1>
         
-        <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
-          Interactive code maps for deep repository analysis.
+        <p className="text-slate-400 text-sm md:text-base font-medium max-w-2xl mx-auto leading-relaxed">
+          Interactive code maps for deep repository analysis and visual article summaries.
+          <br/>
+          <span className="text-pink-400">GitFlow</span>: Analyze GitHub repositories to map data flows and architecture.
+          <br/>
+          <span className="text-cyan-400">SiteSketch</span>: Transform web articles into highly visual, structured infographics.
         </p>
 
         {/* Vertical Action Stack */}
