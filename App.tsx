@@ -74,7 +74,7 @@ const App: React.FC = () => {
     );
   }
 
-  if (!user && currentView !== ViewMode.PRIVACY && currentView !== ViewMode.TERMS) {
+  if (!user && (currentView === ViewMode.REPO_ANALYZER || currentView === ViewMode.ARTICLE_INFOGRAPHIC || currentView === ViewMode.LOGIN)) {
     return <LoginPage onTogglePrivacy={() => setCurrentView(ViewMode.PRIVACY)} onToggleTerms={() => setCurrentView(ViewMode.TERMS)} />;
   }
 

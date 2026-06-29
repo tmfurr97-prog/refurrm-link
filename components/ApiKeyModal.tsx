@@ -56,17 +56,22 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onKeySelected }) => {
             </div>
 
             <div className="space-y-4 mb-8">
-              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 group hover:border-emerald-500/20 transition-colors">
-                <Zap className="w-5 h-5 text-amber-400 mt-1" />
-                <div>
-                  <p className="text-sm font-medium text-slate-200">The Power of Your Own Key</p>
-                  <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
-                    Analyzing repositories requires significant AI compute. Using your own key offers:
-                  </p>
+              <div className="flex flex-col gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 group hover:border-emerald-500/20 transition-colors">
+                <div className="flex items-start gap-3">
+                  <Zap className="w-5 h-5 text-amber-400 mt-1" />
+                  <div>
+                    <p className="text-sm font-medium text-slate-200">Bring Your Own (BYO) Key Model</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+                      ReFURRM L'INK operates on a BYO Key model for AI compute. You provide your own Gemini API key for analysis, while our platform handles the rest.
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-3 border-t border-white/10">
+                  <p className="text-[11px] text-slate-300 font-medium mb-2">Why we charge a platform fee:</p>
                   <ul className="space-y-2 text-[10px] text-slate-400 list-disc list-inside">
-                    <li><span className="text-slate-200">Zero Shared Throttling:</span> No queue times during peak usage.</li>
-                    <li><span className="text-slate-200">Unlimited Analysis:</span> Perform massive deep-dives without local caps.</li>
-                    <li><span className="text-slate-200">Enterprise Privacy:</span> Data routing stays within your cloud billing boundary.</li>
+                    <li><span className="text-slate-200">Secure Hosting & Compute:</span> Rendering complex 3D infographics and maintaining the live IDE environment.</li>
+                    <li><span className="text-slate-200">Premium Templates:</span> Access to proprietary visual architectures and curated analysis prompts.</li>
+                    <li><span className="text-slate-200">Ad-Free Experience:</span> No tracking, no ads, just uninterrupted developer focus.</li>
                   </ul>
                 </div>
               </div>
@@ -86,7 +91,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onKeySelected }) => {
                   type="password"
                   value={key}
                   onChange={(e) => setKey(e.target.value)}
-                  placeholder="Enter Gemini API Key..."
+                  placeholder="Paste your Gemini API Key here (starts with AIza...)"
                   className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10 transition-all font-mono text-sm"
                   required
                 />

@@ -6,7 +6,7 @@
 import React, { useState, useCallback } from 'react';
 import { Mail, Lock, Sparkles, ArrowRight, Github, Loader2, AlertCircle, Shield, Scale } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { loginWithGoogle, loginWithGithub } from '../services/firebase';
+import { loginWithGoogle, loginWithGithub, loginWithEmail, signupWithEmail } from '../services/firebase';
 
 interface LoginPageProps {
   onTogglePrivacy?: () => void;
@@ -20,6 +20,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
   const [focused, setFocused] = useState<string | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const handleSocialLogin = async (provider: 'google' | 'github') => {
     if (!executeRecaptcha) {
@@ -63,9 +64,44 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
     }
   };
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("Email/Password login is restricted to enterprise accounts. Please use the Access Gateway providers below.");
+    if (!executeRecaptcha) {
+      setError("Security verification failed to initialize.");
+      return;
+    }
+    if (!email || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    setIsAuthenticating(true);
+    setError(null);
+    setShowSetupGuide(false);
+
+    try {
+      const token = await executeRecaptcha('login');
+      if (!token) throw new Error("Failed to verify user authenticity.");
+
+      if (isSignUp) {
+        await signupWithEmail(email, password);
+      } else {
+        await loginWithEmail(email, password);
+      }
+    } catch (err: any) {
+      console.error('Email Auth Error:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('Email is already registered. Please log in.');
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setError('Invalid email or password.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password should be at least 6 characters.');
+      } else {
+        setError(err.message || 'Authentication failed. Please try again.');
+      }
+    } finally {
+      setIsAuthenticating(false);
+    }
   };
 
   const [showSetupGuide, setShowSetupGuide] = useState(false);
@@ -256,7 +292,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
               disabled={isAuthenticating}
               className="w-full bg-gradient-to-r from-pink-600 to-cyan-600 hover:from-pink-500 hover:to-cyan-500 text-white font-semibold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-pink-500/10 hover:shadow-cyan-500/20 group mt-6 disabled:opacity-50"
             >
-              Sign In to ReFURRM L'INK
+              {isSignUp ? "Create Account" : "Sign In to ReFURRM L'INK"}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
 
@@ -266,7 +302,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
                 <div className="w-full border-t border-slate-700/50" />
               </div>
               <div className="relative flex justify-center text-[10px]">
-                <span className="bg-[#0f172a] px-3 text-slate-500 font-mono tracking-widest uppercase">Or sign in with</span>
+                <span className="bg-[#0f172a] px-3 text-slate-500 font-mono tracking-widest uppercase">Or continue with</span>
               </div>
             </div>
 
@@ -296,12 +332,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onTogglePrivacy, onToggleTerms })
           {/* Footer */}
           <div className="mt-8 space-y-4">
             <p className="text-center text-xs text-slate-500 font-mono">
-                New to ReFURRM L'INK?{' '}
+                {isSignUp ? "Already have an account?" : "New to ReFURRM L'INK?"}{' '}
                 <button 
-                onClick={() => setError("Registration is currently private. Use the Access Gateway to request trial access.")}
+                type="button"
+                onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
                 className="text-violet-400 hover:text-violet-300 transition-colors font-medium underline underline-offset-4"
                 >
-                Create an account
+                {isSignUp ? "Sign In" : "Create an account"}
                 </button>
             </p>
 
