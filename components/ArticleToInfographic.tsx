@@ -235,7 +235,7 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
                 className="w-full py-5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 rounded-2xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 font-mono text-base tracking-wider hover:shadow-neon-emerald"
             >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                <span>{loading ? "PROCESSING..." : "GENERATE_INFOGRAPHIC"}</span>
+                {loading ? "PROCESSING..." : "GENERATE_INFOGRAPHIC"}
             </button>
          </form>
       </div>
@@ -256,7 +256,7 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
         <div className="glass-panel rounded-3xl p-1.5 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 mb-1.5 bg-slate-950/30 rounded-t-2xl">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
-                  <Sparkles className="w-4 h-4 text-emerald-400" /> <span>Generated_Result</span>
+                  <Sparkles className="w-4 h-4 text-emerald-400" /> Generated_Result
                 </h3>
                 <div className="flex items-center gap-2">
                     <button 
@@ -267,7 +267,7 @@ const ArticleToInfographic: React.FC<ArticleToInfographicProps> = ({ history, on
                         <Maximize className="w-4 h-4" />
                     </button>
                     <a href={`data:image/png;base64,${imageData}`} download="site-sketch.png" className="text-xs flex items-center gap-2 text-emerald-300 hover:text-emerald-200 transition-colors font-mono bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20 font-bold">
-                        <Download className="w-4 h-4" /> <span>DOWNLOAD_PNG</span>
+                        <Download className="w-4 h-4" /> DOWNLOAD_PNG
                     </a>
                 </div>
             </div>

@@ -4,7 +4,7 @@ import { useAuth } from './AuthProvider';
 import { loginWithGoogle, loginWithGithub, logout } from '../services/firebase';
 import { motion, AnimatePresence } from 'motion/react';
 
-export const UserMenu: React.FC = () => {
+export const UserMenu: React.FC<{ onShowLogin?: () => void }> = ({ onShowLogin }) => {
   const { user, loading } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
   const [hoveredProvider, setHoveredProvider] = React.useState<string | null>(null);
@@ -19,11 +19,10 @@ export const UserMenu: React.FC = () => {
 
   if (!user) {
     return (
-      <button
-        onClick={() => document.dispatchEvent(new CustomEvent('trigger-login'))}
-        className="flex items-center gap-2 px-4 py-1.5 md:py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[10px] md:text-xs uppercase tracking-widest hover:bg-emerald-500/20 transition-all shadow-glass"
+      <button 
+        onClick={onShowLogin}
+        className="px-4 py-2 bg-gradient-to-r from-violet-600 to-emerald-600 hover:from-violet-500 hover:to-emerald-500 text-white text-xs font-bold font-mono tracking-wider uppercase rounded-xl transition-all shadow-lg shadow-violet-500/10"
       >
-        <UserIcon className="w-3.5 h-3.5" />
         Sign In
       </button>
     );

@@ -56,23 +56,11 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onKeySelected }) => {
             </div>
 
             <div className="space-y-4 mb-8">
-              <div className="flex flex-col gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 group hover:border-emerald-500/20 transition-colors">
-                <div className="flex items-start gap-3">
-                  <Zap className="w-5 h-5 text-amber-400 mt-1" />
-                  <div>
-                    <p className="text-sm font-medium text-slate-200">Bring Your Own (BYO) Key Model</p>
-                    <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
-                      ReFURRM L'INK operates on a BYO Key model for AI compute. You provide your own Gemini API key for analysis, while our platform handles the rest.
-                    </p>
-                  </div>
-                </div>
-                <div className="pt-3 border-t border-white/10">
-                  <p className="text-[11px] text-slate-300 font-medium mb-2">Why we charge a platform fee:</p>
-                  <ul className="space-y-2 text-[10px] text-slate-400 list-disc list-inside">
-                    <li><span className="text-slate-200">Secure Hosting & Compute:</span> Rendering complex 3D infographics and maintaining the live IDE environment.</li>
-                    <li><span className="text-slate-200">Premium Templates:</span> Access to proprietary visual architectures and curated analysis prompts.</li>
-                    <li><span className="text-slate-200">Ad-Free Experience:</span> No tracking, no ads, just uninterrupted developer focus.</li>
-                  </ul>
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white/5 border border-white/10 group">
+                <Zap className="w-5 h-5 text-amber-400 mt-1" />
+                <div>
+                  <p className="text-sm font-medium text-slate-200">Why is this needed?</p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">Analyzing repositories and generating fixes requires a Gemini API key to access Google's advanced AI models.</p>
                 </div>
               </div>
 
@@ -91,7 +79,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onKeySelected }) => {
                   type="password"
                   value={key}
                   onChange={(e) => setKey(e.target.value)}
-                  placeholder="Paste your Gemini API Key here (starts with AIza...)"
+                  placeholder="Enter Gemini API Key..."
                   className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/10 transition-all font-mono text-sm"
                   required
                 />
@@ -115,14 +103,6 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ onKeySelected }) => {
                 )}
               </button>
             </form>
-
-            <button
-                onClick={() => onKeySelected()}
-                className="w-full mt-4 text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-[0.2em] py-2"
-            >
-                Continue with Limited Trial 
-                <span className="block mt-0.5 opacity-50 capitalize font-sans tracking-normal">(Uses shared community quota)</span>
-            </button>
 
             <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">

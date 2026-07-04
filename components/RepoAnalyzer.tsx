@@ -9,7 +9,7 @@ import { generateInfographic, analyzeRepoCodebase, generateRemasteredFiles, Code
 import { RepoFileTree, ViewMode, RepoHistoryItem } from '../types';
 import { useAuth } from './AuthProvider';
 import { saveAuditLog } from '../services/firebase';
-import { AlertCircle, Loader2, Layers, Box, Download, Sparkles, Command, Palette, Globe, Clock, Maximize, KeyRound, ShieldCheck, Activity, Lightbulb, Zap, Code, Copy, Check, ChevronDown, ChevronRight, Shield, Rocket, Cpu, Lock } from 'lucide-react';
+import { AlertCircle, Loader2, Layers, Box, Download, Sparkles, Command, Palette, Globe, Clock, Maximize, KeyRound, ShieldCheck, Activity, Lightbulb, Zap, Code, Copy, Check, ChevronDown, ChevronRight, Shield, Rocket, Cpu } from 'lucide-react';
 import { LoadingState } from './LoadingState';
 import ImageViewer from './ImageViewer';
 import ReactMarkdown from 'react-markdown';
@@ -63,8 +63,7 @@ const AuditSection: React.FC<{
   icon: React.ReactNode; 
   color: string;
   defaultOpen?: boolean;
-  isAuthenticated: boolean;
-}> = ({ title, content, icon, color, defaultOpen = false, isAuthenticated }) => {
+}> = ({ title, content, icon, color, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   if (!content.trim()) return null;
@@ -90,16 +89,8 @@ const AuditSection: React.FC<{
       </button>
       
       {isOpen && (
-        <div className="px-5 pb-5 pt-0 animate-in slide-in-from-top-2 duration-300 relative">
-          {!isAuthenticated && (
-            <div className="absolute inset-0 z-10 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center pt-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full font-mono text-xs text-white">
-                <Lock className="w-3 h-3 text-emerald-400" />
-                SIGN IN REQUIRED FOR FULL DIAGNOSTICS
-              </div>
-            </div>
-          )}
-          <div className={`prose prose-invert prose-emerald max-w-none prose-sm font-sans selection:bg-emerald-500/30 markdown-body ${!isAuthenticated ? 'opacity-30 pointer-events-none select-none h-32 overflow-hidden' : ''}`}>
+        <div className="px-5 pb-5 pt-0 animate-in slide-in-from-top-2 duration-300">
+          <div className="prose prose-invert prose-emerald max-w-none prose-sm font-sans selection:bg-emerald-500/30 markdown-body">
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
         </div>
@@ -258,15 +249,21 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
   const handleApiError = (err: any) => {
       if (err.message && err.message.includes("Requested entity was not found")) {
           // This specific error often implies a Free Tier key is trying to access a Paid Model.
-          setError("BILLING_REQUIRED: The current API key does not have access to these models. This feature requires a paid Google Cloud Project. Please use the 'Switch Key' button below to provide a valid Paid Tier API Key.");
-          return;
+          // We trigger the window reload to re-open the key selection.
+          const confirmSwitch = window.confirm(
+              "BILLING REQUIRED: The current API key does not have access to these models.\n\n" +
+              "This feature requires a paid Google Cloud Project. Please switch to a valid paid API Key."
+          );
+          if (confirmSwitch) {
+              window.location.reload();
+          }
       }
       setError(err.message || 'An unexpected error occurred during analysis.');
   }
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     setError(null);
     setInfographicData(null);
     setInfographic3DData(null);
@@ -351,11 +348,11 @@ const RepoAnalyzer: React.FC<RepoAnalyzerProps> = ({ onNavigate, history, onAddT
   };
 
   const handleRemaster = async () => {
+    if (!currentRepoName || !currentFileTree || !analysisResult) return;
     if (!user) {
-      setError('AUTHENTICATION_REQUIRED: Automated code remastering requires an account. Please sign in via the gateway above.');
+      setError('PAYWALL: Actual code fixes (Remaster) require a paid account. Please Sign In.');
       return;
     }
-    if (!currentRepoName || !currentFileTree || !analysisResult) return;
     setRemastering(true);
     try {
       const files = await generateRemasteredFiles(currentRepoName, currentFileTree, analysisResult.report);
@@ -406,10 +403,6 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
   };
 
   const handleCopyHandoff = () => {
-    if (!user) {
-      setError('AUTHENTICATION_REQUIRED: Exporting targeted AI handoff prompts requires an account. Please sign in via the gateway above.');
-      return;
-    }
     handleCopy(generateHandoffPrompt());
     setShowHandoff(true);
     setTimeout(() => setShowHandoff(false), 3000);
@@ -582,7 +575,7 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
         <div className="max-w-2xl mx-auto p-4 glass-panel border-red-500/30 rounded-xl flex items-center gap-3 text-red-400 animate-in fade-in slide-in-from-top-2 font-mono text-sm">
           <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-500" />
           <p className="flex-1">{error}</p>
-          {error.toUpperCase().includes("REQUIRED") && (
+          {error.includes("Required") && (
               <button 
                 onClick={() => window.location.reload()}
                 className="px-3 py-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded text-xs font-bold transition-colors flex items-center gap-1"
@@ -617,7 +610,7 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                         <Maximize className="w-4 h-4" />
                       </button>
                       <a href={`data:image/png;base64,${infographicData}`} download={`${currentRepoName}-infographic-2d.png`} className="text-xs flex items-center gap-2 text-slate-300 hover:text-white transition-colors font-mono bg-white/5 px-3 py-1.5 rounded-lg hover:bg-white/10 border border-white/10 font-semibold">
-                        <Download className="w-3 h-3" /> <span>Save PNG</span>
+                        <Download className="w-3 h-3" /> Save PNG
                       </a>
                     </div>
                 </div>
@@ -632,7 +625,7 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
               <div className="glass-panel rounded-3xl p-1.5 flex flex-col">
                  <div className="px-4 py-3 flex flex-wrap items-center justify-between border-b border-white/5 mb-1.5 shrink-0 gap-2">
                     <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2 font-mono uppercase tracking-wider">
-                      <Box className="w-4 h-4 text-fuchsia-400" /> <span>Holographic_Model</span>
+                      <Box className="w-4 h-4 text-fuchsia-400" /> Holographic_Model
                     </h3>
                     {infographic3DData && (
                       <div className="flex items-center gap-2 animate-in fade-in">
@@ -644,7 +637,7 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                             <Maximize className="w-4 h-4" />
                         </button>
                         <a href={`data:image/png;base64,${infographic3DData}`} download={`${currentRepoName}-infographic-3d.png`} className="text-xs flex items-center gap-2 text-slate-300 hover:text-white transition-colors font-mono bg-white/5 px-3 py-1.5 rounded-lg hover:bg-white/10 border border-white/10 font-semibold">
-                          <Download className="w-3 h-3" /> <span>Save PNG</span>
+                          <Download className="w-3 h-3" /> Save PNG
                         </a>
                       </div>
                     )}
@@ -944,17 +937,8 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="bg-emerald-500/5 rounded-xl border border-emerald-500/10 p-5 h-[250px] overflow-auto prose prose-invert prose-xs max-w-none scrollbar-hide relative">
-                                            {!user && (
-                                                <div className="absolute inset-0 z-10 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center">
-                                                    <div className="flex flex-col items-center gap-2">
-                                                        <Lock className="w-5 h-5 text-emerald-400" />
-                                                        <p className="font-mono text-xs text-white">SIGN IN REQUIRED</p>
-                                                        <p className="font-sans text-[10px] text-slate-400">Unlock detailed line-by-line node diagnostics.</p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            <div className={`space-y-4 ${!user ? 'opacity-30 pointer-events-none select-none overflow-hidden h-full' : ''}`}>
+                                        <div className="bg-emerald-500/5 rounded-xl border border-emerald-500/10 p-5 h-[250px] overflow-auto prose prose-invert prose-xs max-w-none scrollbar-hide">
+                                            <div className="space-y-4">
                                                 <ReactMarkdown>
                                                     {getFileSpecificFindings(selectedNodePath)}
                                                 </ReactMarkdown>
@@ -976,28 +960,24 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                         icon={<Shield className="w-4 h-4 text-red-400" />} 
                                         color="bg-red-500 border-red-500"
                                         defaultOpen={true}
-                                        isAuthenticated={!!user}
                                     />
                                     <AuditSection 
                                         title="PERFORMANCE_METRICS" 
                                         content={sections['PERFORMANCE']} 
                                         icon={<Zap className="w-4 h-4 text-emerald-400" />} 
                                         color="bg-emerald-500 border-emerald-500"
-                                        isAuthenticated={!!user}
                                     />
                                     <AuditSection 
                                         title="ARCHITECTURAL_HEALTH" 
                                         content={sections['ARCHITECTURE']} 
                                         icon={<Cpu className="w-4 h-4 text-blue-400" />} 
                                         color="bg-blue-500 border-blue-500"
-                                        isAuthenticated={!!user}
                                     />
                                     <AuditSection 
                                         title="DEVELOPMENT_ROADMAP" 
                                         content={sections['ROADMAP']} 
                                         icon={<Rocket className="w-4 h-4 text-amber-400" />} 
                                         color="bg-amber-500 border-amber-500"
-                                        isAuthenticated={!!user}
                                     />
                                     {sections['GENERAL'] && (
                                         <AuditSection 
@@ -1005,7 +985,6 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                             content={sections['GENERAL']} 
                                             icon={<Activity className="w-4 h-4 text-slate-400" />} 
                                             color="bg-slate-500 border-slate-500"
-                                            isAuthenticated={!!user}
                                         />
                                     )}
                                 </>
@@ -1017,22 +996,18 @@ Please act as a Senior Engineer and help me refactor the most critical files bas
                                 <Lightbulb className="w-3 h-3" /> Report generated via SiteSketch AI Engine - High Fidelity Mode
                             </div>
                             <div className="flex items-center gap-3">
-                                {user && (
-                                    <>
-                                        <button 
-                                            onClick={() => handleDownloadFile(`${currentRepoName}-intelligence-report.md`, analysisResult.report)}
-                                            className="text-[10px] font-mono text-slate-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5"
-                                        >
-                                            <Download className="w-3 h-3" /> DOWNLOAD_REPORT
-                                        </button>
-                                        <button 
-                                            onClick={() => handleCopy(analysisResult.report)}
-                                            className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1.5"
-                                        >
-                                            <Copy className="w-3 h-3" /> COPY_FULL_REPORT
-                                        </button>
-                                    </>
-                                )}
+                                <button 
+                                    onClick={() => handleDownloadFile(`${currentRepoName}-intelligence-report.md`, analysisResult.report)}
+                                    className="text-[10px] font-mono text-slate-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                                >
+                                    <Download className="w-3 h-3" /> DOWNLOAD_REPORT
+                                </button>
+                                <button 
+                                    onClick={() => handleCopy(analysisResult.report)}
+                                    className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1.5"
+                                >
+                                    <Copy className="w-3 h-3" /> COPY_FULL_REPORT
+                                </button>
                                 <button 
                                     onClick={() => setAnalysisResult(null)}
                                     className="text-[10px] font-mono text-slate-500 hover:text-red-500/60 transition-colors underline underline-offset-4"

@@ -6,11 +6,9 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { RepoFileTree, Citation } from '../types';
 
-// Helper to ensure we always get the freshest key
-const getAiClient = () => {
-  const userKey = typeof window !== 'undefined' ? localStorage.getItem('REFURRM_API_KEY') : null;
-  return new GoogleGenAI({ apiKey: userKey || process.env.GEMINI_API_KEY || '' });
-};
+// Helper to ensure we always get the freshest key from the environment
+// immediately before a call.
+const getAiClient = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export interface InfographicResult {
     imageData: string | null;

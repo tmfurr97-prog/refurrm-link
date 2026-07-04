@@ -9,8 +9,6 @@ import ArticleToInfographic from './components/ArticleToInfographic';
 import Home from './components/Home';
 import LoginPage from './components/LoginPage';
 import ApiKeyModal from './components/ApiKeyModal';
-import { PrivacyPolicy } from './components/PrivacyPolicy';
-import { TermsOfService } from './components/TermsOfService';
 import { ViewMode, RepoHistoryItem, ArticleHistoryItem } from './types';
 import { Github, PenTool, GitBranch, FileText, Home as HomeIcon, ShieldAlert, Sparkles, CreditCard } from 'lucide-react';
 import { UserMenu } from './components/UserMenu';
@@ -21,21 +19,13 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewMode>(ViewMode.HOME);
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [checkingKey, setCheckingKey] = useState<boolean>(true);
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   
   // Lifted History State for Persistence
   const [repoHistory, setRepoHistory] = useState<RepoHistoryItem[]>([]);
   const [articleHistory, setArticleHistory] = useState<ArticleHistoryItem[]>([]);
 
   useEffect(() => {
-    // Handle deep links via URL parameters
-    const params = new URLSearchParams(window.location.search);
-    const view = params.get('view');
-    if (view === 'privacy') {
-      setCurrentView(ViewMode.PRIVACY);
-    } else if (view === 'terms') {
-      setCurrentView(ViewMode.TERMS);
-    }
-
     const checkKey = async () => {
       if (window.aistudio && window.aistudio.hasSelectedApiKey) {
         const has = await window.aistudio.hasSelectedApiKey();
@@ -47,10 +37,6 @@ const App: React.FC = () => {
       setCheckingKey(false);
     };
     checkKey();
-
-    const handleLoginTrigger = () => setCurrentView(ViewMode.LOGIN);
-    document.addEventListener('trigger-login', handleLoginTrigger);
-    return () => document.removeEventListener('trigger-login', handleLoginTrigger);
   }, []);
 
   const handleNavigate = (mode: ViewMode) => {
@@ -65,12 +51,6 @@ const App: React.FC = () => {
     setArticleHistory(prev => [item, ...prev]);
   };
 
-  useEffect(() => {
-    if (user && currentView === ViewMode.LOGIN) {
-      setCurrentView(ViewMode.HOME);
-    }
-  }, [user, currentView]);
-
   if (checkingKey || loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -84,22 +64,10 @@ const App: React.FC = () => {
     );
   }
 
-  if (currentView === ViewMode.LOGIN && !user) {
-    return <LoginPage onTogglePrivacy={() => setCurrentView(ViewMode.PRIVACY)} onToggleTerms={() => setCurrentView(ViewMode.TERMS)} />;
-  }
-
-  if (currentView === ViewMode.PRIVACY) {
-    return <PrivacyPolicy onBack={() => setCurrentView(user ? ViewMode.HOME : ViewMode.LOGIN)} />;
-  }
-
-  if (currentView === ViewMode.TERMS) {
-    return <TermsOfService onBack={() => setCurrentView(user ? ViewMode.HOME : ViewMode.LOGIN)} />;
-  }
-
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Enforce API Key Modal */}
-      {!hasApiKey && <ApiKeyModal onKeySelected={() => setHasApiKey(true)} />}
+      {/* Enforce API Key Modal ONLY when they actually have the key */}
+      {!hasApiKey && user && <ApiKeyModal onKeySelected={() => setHasApiKey(true)} />}
 
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-slate-950/80 backdrop-blur-md">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-2 md:py-2.5 flex justify-between items-center">
@@ -107,14 +75,14 @@ const App: React.FC = () => {
             onClick={() => setCurrentView(ViewMode.HOME)}
             className="flex items-center gap-3 md:gap-4 group transition-opacity hover:opacity-80"
           >
-            <div className="relative flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl bg-slate-900 border border-white/10 shadow-inner group-hover:border-pink-500/50 transition-colors overflow-hidden">
-               <img src="/logo-icon.svg" alt="RFL" className="w-7 h-7 md:w-10 md:h-10" />
+            <div className="relative flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-xl bg-slate-900/50 border border-white/10 shadow-inner group-hover:border-emerald-500/50 transition-colors">
+               <GitBranch className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <div className="text-left">
-              <h1 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight font-mono flex items-baseline gap-2">
-                L'iNk
+              <h1 className="text-lg md:text-xl font-extrabold text-white tracking-tight font-sans flex items-center gap-2">
+                ReFURRM <span className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-mono text-emerald-400 border border-white/5 hidden sm:inline-block">L'INK</span>
               </h1>
-              <p className="text-[10px] md:text-xs font-mono text-slate-500 tracking-wider uppercase hidden sm:block mt-0.5">Repository Analysis Platform</p>
+              <p className="text-xs font-mono text-slate-400 tracking-wider uppercase hidden sm:block">Repository Analysis Platform</p>
             </div>
           </button>
             <div className="flex items-center gap-4">
@@ -123,10 +91,12 @@ const App: React.FC = () => {
                       <CreditCard className="w-3 h-3" /> Paid Tier
                   </div>
               )}
-              <UserMenu />
+              <UserMenu onShowLogin={() => setShowLoginModal(true)} />
             </div>
         </div>
       </header>
+
+      {showLoginModal && <LoginPage onClose={() => setShowLoginModal(false)} />}
 
       <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col">
         {/* Navigation Tabs (Hidden on Home, visible on tools) */}
