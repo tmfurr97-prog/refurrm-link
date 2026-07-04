@@ -25,6 +25,15 @@ const ALLOWED_IMAGE_MIME_TYPES = new Set([
   'image/bmp'
 ]);
 
+const CANONICAL_IMAGE_MIME_TYPES: Record<string, string> = {
+  'image/png': 'image/png',
+  'image/jpeg': 'image/jpeg',
+  'image/jpg': 'image/jpeg',
+  'image/webp': 'image/webp',
+  'image/gif': 'image/gif',
+  'image/bmp': 'image/bmp'
+};
+
 interface ImageEditorProps {
   initialState?: { data: string; mimeType: string } | null;
   onNavigate?: (mode: ViewMode) => void;
@@ -55,13 +64,18 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialState, onNavigate }) =
         setError('Please select a valid image file (PNG, JPEG, WEBP, GIF, or BMP).');
         return;
       }
+      const normalizedMimeType = CANONICAL_IMAGE_MIME_TYPES[file.type];
+      if (!normalizedMimeType) {
+        setError('Please select a valid image file (PNG, JPEG, WEBP, GIF, or BMP).');
+        return;
+      }
       setError(null);
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
         const base64Data = base64.split(',')[1];
         setImageData(base64Data);
-        setMimeType(file.type);
+        setMimeType(normalizedMimeType);
         setEditedImageData(null);
       };
       reader.readAsDataURL(file);
